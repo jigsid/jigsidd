@@ -1,0 +1,15 @@
+{
+  "short_name": "Siddham",
+  "name": "Siddham Mishra",
+  "icons": [
+    {
+      "src": "./jigsaw.svg",
+      "sizes": "64x64",
+      "type": "image/svg"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#111111",
+  "background_color": "#111111"
+}
