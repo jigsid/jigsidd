@@ -22,7 +22,7 @@ export const socialLinks = [
   },
   {
     label: 'Figma',
-    url: 'https://www.linkedin.com/in/siddham-mishra-611437247/',
+    url: 'https://mail.google.com/mail/?view=cm&fs=1&to=jigsawsmma@gmail.com',
     icon: 'figma',
   },
 ];
