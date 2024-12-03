@@ -126,8 +126,8 @@ export const Home = () => {
         sectionRef={projectThree}
         visible={visibleSections.includes(projectThree.current)}
         index={2}
-        title=" Ez Post"
-        description="A simple website where User can Post message and see what others has Posted previously."
+        title=" Automate"
+        description="Website where user can automate their work by sending messages to slack/discord/notion all at one place.Also AI bot is there to help you out."
         buttonLink="/projects/slice"
         buttonText="View project"
         model={{

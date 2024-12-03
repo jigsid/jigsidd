@@ -40,14 +40,15 @@ import { Fragment } from 'react';
 import { media } from 'utils/style';
 import styles from './Slice.module.css';
 
-const title = 'Ez Post';
+const title = 'Automate';
 const description =
-  'Technologies Used: React, Typescript, Postgress, Prisma ORM, Cloudflare Workers, JWT';
+  'Technologies Used: Next.js, Typescript, Postgress, Prisma ORM, Slack/discord/notion/google integration, clerk authentication';
 const roles = [
   'Functionlaties',
-  'Signin/Signup',
-  'Post:Title, Content',
-  'JWT Authentication',
+  'Modern UI',
+  'Autosend messages to slack/discord/notion',
+  'Clerk Authentication',
+  'AI bot',
 ];
 
 export const Slice = () => {
@@ -64,7 +65,7 @@ export const Slice = () => {
         <ProjectHeader
           title={title}
           description={description}
-          url="https://github.com/jigsid/Ez-Post"
+          url="https://github.com/jigsid/saasautomation"
           roles={roles}
         />
         
