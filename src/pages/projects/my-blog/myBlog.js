@@ -60,6 +60,7 @@ export const MyBlog = () => {
           title={title}
           description={description}
           url="https://github.com/jigsid/Ez-Pay"
+          url2="https://ez-pay-opal.vercel.app/"
           roles={roles}
         />
         <ProjectSection padding="top">

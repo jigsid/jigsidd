@@ -66,9 +66,9 @@ export const Slice = () => {
           title={title}
           description={description}
           url="https://github.com/jigsid/saasautomation"
-          roles={roles}
+          url2="https://automate69.vercel.app/"
+         roles={roles}
         />
-        
       </ProjectContainer>
     </Fragment>
   );

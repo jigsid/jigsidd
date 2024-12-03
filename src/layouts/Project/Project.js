@@ -18,6 +18,8 @@ export function ProjectHeader({
   linkLabel = 'Github',
   url,
   roles,
+  linkLabel2= 'Website',
+  url2,
   className,
 }) {
   return (
@@ -43,6 +45,18 @@ export function ProjectHeader({
             >
               {linkLabel}
             </Button>
+            
+          )}
+          {!!url &&(
+          <Button
+            secondary
+            iconHoverShift
+            className={styles.linkButton}
+            icon="chevronRight"
+            href={url2}
+          >
+            {linkLabel2}
+          </Button>
           )}
         </div>
         {!!roles?.length && (
