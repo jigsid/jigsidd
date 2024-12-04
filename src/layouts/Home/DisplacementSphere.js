@@ -59,7 +59,7 @@ export const DisplacementSphere = (props) => {
       audioRef.current = new Audio(song);
       const storedCurrentTime = localStorage.getItem('audioCurrentTime');
       const storedIsPlaying = localStorage.getItem('audioIsPlaying');
-
+  
       if (storedCurrentTime) {
         audioRef.current.currentTime = parseFloat(storedCurrentTime);
         setCurrentTime(parseFloat(storedCurrentTime));
@@ -69,31 +69,39 @@ export const DisplacementSphere = (props) => {
         setIsPlaying(true);
         setBarOpacity(0.1);
       }
-    }
-
-    return () => {
-      if (audioRef.current) {
+  
+      // Update current time during playback
+      const updateTime = () => {
         setCurrentTime(audioRef.current.currentTime);
-        audioRef.current.pause();
         localStorage.setItem('audioCurrentTime', audioRef.current.currentTime);
-        localStorage.setItem('audioIsPlaying', isPlaying);
-      }
-    };
+      };
+      audioRef.current.addEventListener('timeupdate', updateTime);
+  
+      return () => {
+        audioRef.current.removeEventListener('timeupdate', updateTime);
+        if (audioRef.current) {
+          audioRef.current.pause();
+          localStorage.setItem('audioCurrentTime', audioRef.current.currentTime);
+          localStorage.setItem('audioIsPlaying', isPlaying);
+        }
+      };
+    }
   }, []);
-
+  
   const toggleAudioPlayback = () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
         setBarOpacity(0.85);
       } else {
-        audioRef.current.currentTime = currentTime;
         audioRef.current.play().catch((error) => console.error("Audio playback failed:", error));
         setBarOpacity(0.7);
       }
       setIsPlaying(!isPlaying);
+      localStorage.setItem('audioIsPlaying', !isPlaying);
     }
   };
+  
 
   // Three.js Initialization
   useEffect(() => {
