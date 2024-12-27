@@ -18,6 +18,7 @@ import { ProjectSummary } from 'layouts/Home/ProjectSummary';
 import { useEffect, useRef, useState } from 'react';
 import pic3 from '../../assets/pic3.png';
 import styles from './Home.module.css';
+import ChatbotIframe from 'layouts/ChatbotIframe';
 
 
 const disciplines = ['Backend', 'DevOps', 'Frontend'];
@@ -147,6 +148,8 @@ export const Home = () => {
         id="details"
       />
       <Footer />
+
+     <ChatbotIframe />
     </div>
   );
 };
