@@ -268,31 +268,14 @@ export const DisplacementSphere = (props) => {
             ref={canvasRef}
             {...props}
           />
-          <div
+          <button
             onClick={toggleAudioPlayback}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            aria-label={isPlaying ? 'Pause background music' : 'Play background music'}
+            className={styles.musicButton}
             style={{
-              position: 'fixed',
-              top: '20px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '300px',
-              height: '50px',
-              background: 'rgba(0, 0, 0, 0.7)',
-              backdropFilter: 'blur(10px)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '10px 20px',
-              color: 'white',
-              zIndex: 10,
-              border: '1px solid rgba(255, 255, 255, 0.1)',
               opacity: isHovered ? 1 : barOpacity,
-              cursor: 'pointer',
-              borderRadius: '12px',
-              transition: 'all 0.3s ease',
               boxShadow: isHovered ? '0 8px 32px rgba(0, 0, 0, 0.3)' : 'none',
             }}
           >
@@ -334,7 +317,7 @@ export const DisplacementSphere = (props) => {
                 />
               ))}
             </div>
-          </div>
+          </button>
         </>
       )}
     </Transition>
