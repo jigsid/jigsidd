@@ -23,6 +23,7 @@ import styles from './DisplacementSphere.module.css';
 import fragShader from './displacementSphereFragment.glsl';
 import vertShader from './displacementSphereVertex.glsl';
 import song from '../../assets/song.mp3';
+import { Icon } from 'components/Icon';
 
 const springConfig = {
   stiffness: 30,
@@ -279,40 +280,14 @@ export const DisplacementSphere = (props) => {
               boxShadow: isHovered ? '0 8px 32px rgba(0, 0, 0, 0.3)' : 'none',
             }}
           >
-            <div style={{ 
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <span style={{ 
-                color: 'white',
-                fontSize: '14px',
-                fontWeight: '500',
-                opacity: 0.9,
-                textAlign: 'center'
-              }}>
-                {isPlaying ? 'Now Playing' : 'Play Background Music'}
-              </span>
-            </div>
-            
-            <div style={{ 
-              width: '100%',
-              height: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '2px',
-              marginTop: '4px'
-            }}>
-              {audioVisualizerData.map((value, index) => (
+            <Icon icon={isPlaying ? 'pause' : 'play'} />
+            <div className={styles.visualizer}>
+              {audioVisualizerData.slice(0, 3).map((value, index) => (
                 <div
                   key={index}
+                  className={styles.visualizerBar}
                   style={{
-                    flex: 1,
                     height: `${value * 100}%`,
-                    background: 'rgba(255, 255, 255, 0.7)',
-                    borderRadius: '1px',
-                    transition: 'height 0.1s ease',
                   }}
                 />
               ))}

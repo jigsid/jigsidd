@@ -107,7 +107,7 @@ export function Intro({ id, sectionRef, disciplines, scrollIndicatorHidden, ...r
                 </div>
               </Heading>
             </header>
-            <RouterLink href="/#project-1">
+            <RouterLink href="/#project-1" legacyBehavior>
               <a
                 className={styles.scrollIndicator}
                 data-status={status}
@@ -117,7 +117,7 @@ export function Intro({ id, sectionRef, disciplines, scrollIndicatorHidden, ...r
                 <VisuallyHidden>Scroll to projects</VisuallyHidden>
               </a>
             </RouterLink>
-            <RouterLink href="/#project-1">
+            <RouterLink href="/#project-1" legacyBehavior>
               <a
                 className={styles.mobileScrollIndicator}
                 data-status={status}
