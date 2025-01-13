@@ -51,14 +51,25 @@ export const DisplacementSphere = (props) => {
   const rotationY = useSpring(0, springConfig);
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [barOpacity, setBarOpacity] = useState(6);
+  const [barOpacity, setBarOpacity] = useState(0.85);
   const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [audioVisualizerData, setAudioVisualizerData] = useState(new Array(30).fill(0));
+  const [particleTrails, setParticleTrails] = useState([]);
+  const [glowIntensity, setGlowIntensity] = useState(0);
+  const [waveformRotation, setWaveformRotation] = useState(0);
 
+  // Single audio initialization useEffect
   useEffect(() => {
     if (typeof window !== 'undefined') {
       audioRef.current = new Audio(song);
       const storedCurrentTime = localStorage.getItem('audioCurrentTime');
       const storedIsPlaying = localStorage.getItem('audioIsPlaying');
+  
+      audioRef.current.addEventListener('loadedmetadata', () => {
+        setDuration(audioRef.current.duration);
+      });
   
       if (storedCurrentTime) {
         audioRef.current.currentTime = parseFloat(storedCurrentTime);
@@ -67,19 +78,21 @@ export const DisplacementSphere = (props) => {
       if (storedIsPlaying === 'true') {
         audioRef.current.play().catch((error) => console.error("Audio playback failed:", error));
         setIsPlaying(true);
-        setBarOpacity(0.1);
+        setBarOpacity(0.95);
       }
   
-      // Update current time during playback
       const updateTime = () => {
-        setCurrentTime(audioRef.current.currentTime);
-        localStorage.setItem('audioCurrentTime', audioRef.current.currentTime);
+        if (audioRef.current) {
+          setCurrentTime(audioRef.current.currentTime);
+          localStorage.setItem('audioCurrentTime', audioRef.current.currentTime);
+        }
       };
+  
       audioRef.current.addEventListener('timeupdate', updateTime);
   
       return () => {
-        audioRef.current.removeEventListener('timeupdate', updateTime);
         if (audioRef.current) {
+          audioRef.current.removeEventListener('timeupdate', updateTime);
           audioRef.current.pause();
           localStorage.setItem('audioCurrentTime', audioRef.current.currentTime);
           localStorage.setItem('audioIsPlaying', isPlaying);
@@ -87,7 +100,7 @@ export const DisplacementSphere = (props) => {
       };
     }
   }, []);
-  
+
   const toggleAudioPlayback = () => {
     if (audioRef.current) {
       if (isPlaying) {
@@ -95,13 +108,12 @@ export const DisplacementSphere = (props) => {
         setBarOpacity(0.85);
       } else {
         audioRef.current.play().catch((error) => console.error("Audio playback failed:", error));
-        setBarOpacity(0.7);
+        setBarOpacity(0.95);
       }
       setIsPlaying(!isPlaying);
       localStorage.setItem('audioIsPlaying', !isPlaying);
     }
   };
-  
 
   // Three.js Initialization
   useEffect(() => {
@@ -233,6 +245,99 @@ export const DisplacementSphere = (props) => {
     };
   }, [isInViewport, reduceMotion, rotationX, rotationY]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      audioRef.current = new Audio(song);
+      const storedCurrentTime = localStorage.getItem('audioCurrentTime');
+      const storedIsPlaying = localStorage.getItem('audioIsPlaying');
+
+      audioRef.current.addEventListener('loadedmetadata', () => {
+        setDuration(audioRef.current.duration);
+      });
+
+      if (storedCurrentTime) {
+        audioRef.current.currentTime = parseFloat(storedCurrentTime);
+        setCurrentTime(parseFloat(storedCurrentTime));
+      }
+      if (storedIsPlaying === 'true') {
+        audioRef.current.play().catch((error) => console.error("Audio playback failed:", error));
+        setIsPlaying(true);
+        setBarOpacity(0.95);
+      }
+
+      // Update visualizer and effects
+      const updateVisuals = () => {
+        if (isPlaying) {
+          // Generate futuristic waveform data
+          const newVisualizerData = audioVisualizerData.map(() => 
+            Math.random() * (isPlaying ? 1 : 0.1)
+          );
+          setAudioVisualizerData(newVisualizerData);
+
+          // Update particle trails
+          const newParticles = newVisualizerData.map((height, index) => ({
+            id: Date.now() + index,
+            x: (index / newVisualizerData.length) * 100,
+            y: height * 100,
+            opacity: Math.random() * 0.5 + 0.5,
+            size: Math.random() * 2 + 1
+          }));
+          setParticleTrails(prev => [...prev, ...newParticles].slice(-100));
+
+          // Update glow effect
+          const avgIntensity = newVisualizerData.reduce((a, b) => a + b, 0) / newVisualizerData.length;
+          setGlowIntensity(avgIntensity);
+
+          // Rotate waveform
+          setWaveformRotation(prev => (prev + 0.5) % 360);
+        }
+      };
+
+      const updateTime = () => {
+        if (audioRef.current) {
+          setCurrentTime(audioRef.current.currentTime);
+          localStorage.setItem('audioCurrentTime', audioRef.current.currentTime);
+        }
+      };
+
+      const visualsInterval = setInterval(updateVisuals, 50);
+      
+      if (audioRef.current) {
+        audioRef.current.addEventListener('timeupdate', updateTime);
+      }
+
+      return () => {
+        clearInterval(visualsInterval);
+        if (audioRef.current) {
+          audioRef.current.removeEventListener('timeupdate', updateTime);
+          audioRef.current.pause();
+          localStorage.setItem('audioCurrentTime', audioRef.current.currentTime);
+          localStorage.setItem('audioIsPlaying', isPlaying);
+        }
+      };
+    }
+  }, [isPlaying, audioVisualizerData]);
+
+  // Update sphere material when playing
+  useEffect(() => {
+    if (material.current && uniforms.current) {
+      uniforms.current.isPlaying.value = isPlaying;
+      if (isPlaying) {
+        material.current.wireframe = true;
+        sphere.current.scale.set(1.1, 1.1, 1.1);
+      } else {
+        material.current.wireframe = false;
+        sphere.current.scale.set(1, 1, 1);
+      }
+    }
+  }, [isPlaying]);
+
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   return (
     <Transition in timeout={3000}>
       {visible => (
@@ -246,29 +351,32 @@ export const DisplacementSphere = (props) => {
           />
           <div
             onClick={toggleAudioPlayback}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             style={{
               position: 'fixed',
-              top: '10px',
+              top: '20px',
               left: '50%',
               transform: 'translateX(-50%)',
-              width: '50%',
-              height: '60px',
-              background: 'linear-gradient(90deg, black, #ADD8E6, white)', // Light blue gradient
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '0 20px',
-              color: 'black',
-              zIndex: 10,
-              border: isPlaying ? '2px solid #333' : 'none', // Darker border when playing
-              opacity: barOpacity,
+              padding: '12px 24px',
+              background: `rgba(0, 0, 0, ${isPlaying ? '0.5' : '0.7'})`,
+              color: 'white',
+              borderRadius: '12px',
               cursor: 'pointer',
-              borderRadius: '30px',
-              transition: 'border 0.3s ease, opacity 0.3s ease',
+              opacity: isHovered ? 1 : barOpacity,
+              transition: 'all 0.3s ease',
+              border: `1px solid rgba(255, 255, 255, ${isPlaying ? '0.2' : '0.1'})`,
+              backdropFilter: 'blur(10px)',
+              zIndex: 10,
+              boxShadow: isHovered ? '0 8px 32px rgba(0, 0, 0, 0.3)' : 'none'
             }}
           >
-            <span style={{ color: 'black', fontSize: '18px', fontWeight: 'bold' }}>
-              {isPlaying ? 'Pause' : 'Play Music?'}
+            <span style={{ 
+              fontSize: '14px',
+              fontWeight: '500',
+              opacity: 0.9
+            }}>
+              {isPlaying ? 'Pause Music' : 'Play Music'}
             </span>
           </div>
         </>

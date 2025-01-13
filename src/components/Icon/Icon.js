@@ -15,6 +15,7 @@ import Pause from './svg/pause.svg';
 import Play from './svg/play.svg';
 import Send from './svg/send.svg';
 import Twitter from './svg/twitter.svg';
+import LinkedIn from './svg/linkedin.svg';
 
 export const icons = {
   arrowLeft: ArrowLeft,
@@ -32,10 +33,16 @@ export const icons = {
   play: Play,
   send: Send,
   twitter: Twitter,
+  linkedin: LinkedIn,
 };
 
 export const Icon = ({ icon, className, ...rest }) => {
   const IconComponent = icons[icon];
+
+  if (!IconComponent) {
+    console.warn(`Icon "${icon}" not found`);
+    return null;
+  }
 
   return (
     <IconComponent aria-hidden className={classes(styles.icon, className)} {...rest} />
