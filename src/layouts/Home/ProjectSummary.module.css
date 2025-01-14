@@ -3,14 +3,31 @@
   width: 100%;
   max-height: 1080px;
   padding-bottom: var(--spaceL);
-  margin: 120px 0;
+  margin: 180px 0;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  perspective: 1400px;
+  transform-style: preserve-3d;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 60%,
+      rgba(0, 0, 0, 0.08) 100%
+    );
+    z-index: var(--zIndex0);
+    pointer-events: none;
+  }
 
   @media (--mediaDesktop) {
-    margin: var(--space2XL) 0;
+    margin: var(--space3XL) 0;
   }
 
   @media (--mediaTablet) {
@@ -30,10 +47,35 @@
       margin-top: 0;
     }
   }
+
+  &:hover {
+    .details {
+      transform: translateZ(120px);
+    }
+
+    .model[data-device='laptop'] {
+      transform: translateZ(80px) rotateY(-12deg) rotateX(2deg);
+      filter: brightness(1.1) contrast(1.05);
+    }
+
+    .model[data-device='phone'] {
+      transform: translateZ(80px) rotateY(-12deg) rotateX(2deg);
+      filter: brightness(1.1) contrast(1.05);
+    }
+
+    @media (--mediaTablet) {
+      .details,
+      .model[data-device='laptop'],
+      .model[data-device='phone'] {
+        transform: none;
+        filter: none;
+      }
+    }
+  }
 }
 
 .content {
-  --textColumnWidth: 36%;
+  --textColumnWidth: 42%;
 
   width: 100%;
   max-width: var(--maxWidthL);
@@ -41,14 +83,16 @@
   justify-content: center;
   display: grid;
   grid-template-columns: var(--textColumnWidth) 1fr;
-  grid-column-gap: var(--space2XL);
+  grid-column-gap: 0;
+  position: relative;
+  transform-style: preserve-3d;
 
   @nest .summary[data-alternate='true'] & {
     grid-template-columns: 1fr var(--textColumnWidth);
   }
 
   @media (--mediaLaptop) {
-    --textColumnWidth: 40%;
+    --textColumnWidth: 45%;
   }
 
   @media (--mediaTablet) {
@@ -65,6 +109,9 @@
 .details {
   z-index: var(--zIndex1);
   position: relative;
+  transform: translateZ(100px);
+  transition: all 0.7s cubic-bezier(0.3, 0.1, 0.3, 1);
+  padding: var(--spaceL);
 
   @media (--mediaTablet) {
     flex: 0 0 auto;
@@ -72,6 +119,7 @@
     grid-row: 2;
     grid-column: 1;
     justify-self: center;
+    transform: none;
   }
 }
 
@@ -83,6 +131,23 @@
   justify-content: center;
   height: 100%;
   width: 100%;
+  transform-style: preserve-3d;
+
+  @media (--mediaTablet) {
+    grid-row: 1;
+    grid-column: 1;
+    justify-self: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 440px;
+    margin-bottom: var(--spaceXL);
+  }
+
+  @media (--mediaMobile) {
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: var(--spaceL);
+  }
 }
 
 .model {
@@ -93,48 +158,60 @@
   aspect-ratio: var(--aspectRatio);
   display: grid;
   position: relative;
+  transform-style: preserve-3d;
+  transition: all 0.7s cubic-bezier(0.3, 0.1, 0.3, 1);
+  filter: brightness(1) contrast(1.02);
 
   &[data-device='laptop'] {
-    top: 6%;
-    left: 14%;
+    top: 8%;
+    left: -25%;
+    transform: translateZ(60px) rotateY(-8deg);
+    filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.18));
 
-    @media (--mediaDesktop) {
-      --width: 180%;
+    @nest .summary[data-alternate='true'] & {
+      --width: 190%;
+      left: 35%;
+      top: 14%;
+      transform: translateZ(60px) rotateY(-8deg);
     }
 
     @media (--mediaTablet) {
       --width: 140%;
+      top: 0;
+      left: 0;
+      transform: none;
+      filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15));
+    }
 
-      top: 10%;
+    @media (--mediaMobile) {
+      --width: 100%;
+      margin: 0 auto;
+      top: 0;
       left: 0;
     }
   }
 
   &[data-device='phone'] {
-    --width: 116%;
+    --width: 85%;
     --aspectRatio: 7 / 10;
-
     top: 5%;
-    left: -10%;
-
-    @media (--mediaDesktop) {
-      --width: 108%;
-
-      left: 0;
-    }
+    left: -5%;
+    transform: translateZ(60px) rotateY(-8deg);
+    filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.18));
 
     @media (--mediaTablet) {
-      --width: 108%;
-
+      --width: 70%;
+      top: 0;
       left: 0;
-      max-height: 60vh;
+      transform: none;
+      filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15));
     }
 
     @media (--mediaMobile) {
-      --width: 108%;
-
+      --width: 65%;
+      margin: 0 auto;
+      top: 0;
       left: 0;
-      max-height: none;
     }
   }
 }
@@ -211,58 +288,53 @@
 }
 
 .title {
-  margin-bottom: var(--spaceL);
-  transition-property: opacity;
-  transition-timing-function: var(--bezierFastoutSlowin);
-  transition-duration: var(--durationXL);
-  transition-delay: var(--durationM);
+  margin-bottom: var(--spaceXL);
+  transition: all 0.7s cubic-bezier(0.3, 0.1, 0.3, 1);
   opacity: 0;
+  transform: translate3d(0, var(--spaceL), 0);
+  font-size: var(--fontSizeH2);
+  letter-spacing: -0.6px;
+  line-height: 1.1;
 
   @media (--mediaUseMotion) {
     transition-property: transform, opacity;
-    transform: translate3d(0, var(--spaceL), 0);
   }
 
   &[data-visible='true'] {
-    transform: none;
+    transform: translate3d(0, 0, 0);
     opacity: 1;
   }
 }
 
 .description {
   margin-bottom: var(--spaceXL);
-  transition-property: opacity;
-  transition-timing-function: var(--bezierFastoutSlowin);
-  transition-duration: var(--durationXL);
-  transition-delay: var(--durationL);
+  transition: all 0.7s cubic-bezier(0.3, 0.1, 0.3, 1);
   opacity: 0;
+  transform: translate3d(0, var(--spaceL), 0);
+  font-size: var(--fontSizeBodyL);
+  line-height: 1.8;
 
   @media (--mediaUseMotion) {
     transition-property: transform, opacity;
-    transform: translate3d(0, var(--spaceL), 0);
   }
 
   &[data-visible='true'] {
-    transform: none;
+    transform: translate3d(0, 0, 0);
     opacity: 1;
   }
 }
 
 .button {
-  transition-property: opacity;
-  transition-timing-function: var(--bezierFastoutSlowin);
-  transition-duration: var(--durationXL);
-  transition-delay: var(--durationXL);
-  transform: translate3d(0, var(--spaceL), 0);
+  transition: all 0.7s cubic-bezier(0.3, 0.1, 0.3, 1);
   opacity: 0;
+  transform: translate3d(0, var(--spaceL), 0);
 
   @media (--mediaUseMotion) {
     transition-property: transform, opacity;
-    transform: translate3d(0, var(--spaceL), 0);
   }
 
   &[data-visible='true'] {
-    transform: none;
+    transform: translate3d(0, 0, 0);
     opacity: 1;
   }
 }

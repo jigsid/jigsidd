@@ -10,6 +10,9 @@ import sliceTexture from 'assets/pic1.png';
 import sprTextureLarge from 'assets/myblog.jpg';
 import sprTexturePlaceholder from 'assets/myblog.jpg';
 import sprTexture from 'assets/myblog.jpg';
+import volkiharTextureLarge from 'assets/volkihar-banner-large.jpg';
+import volkiharTexturePlaceholder from 'assets/volkihar-banner-placeholder.jpg';
+import volkiharTexture from 'assets/volkihar-banner.jpg';
 import { Footer } from 'components/Footer';
 import { Meta } from 'components/Meta';
 import { Intro } from 'layouts/Home/Intro';
@@ -20,20 +23,20 @@ import pic3 from '../../assets/pic3.png';
 import styles from './Home.module.css';
 import ChatbotIframe from 'layouts/ChatbotIframe';
 
-
 const disciplines = ['Backend', 'DevOps', 'Frontend'];
 
 export const Home = () => {
   const [visibleSections, setVisibleSections] = useState([]);
   const [scrollIndicatorHidden, setScrollIndicatorHidden] = useState(false);
-  const intro = useRef();
-  const projectOne = useRef();
-  const projectTwo = useRef();
-  const projectThree = useRef();
-  const details = useRef();
+  const intro = useRef(null);
+  const projectOne = useRef(null);
+  const projectTwo = useRef(null);
+  const projectThree = useRef(null);
+  const projectFour = useRef(null);
+  const details = useRef(null);
 
   useEffect(() => {
-    const sections = [intro, projectOne, projectThree, details];
+    const sections = [intro, projectOne, projectTwo, projectThree, projectFour, details].filter(Boolean);
 
     const sectionObserver = new IntersectionObserver(
       (entries, observer) => {
@@ -57,10 +60,14 @@ export const Home = () => {
     );
 
     sections.forEach(section => {
-      sectionObserver.observe(section.current);
+      if (section.current) {
+        sectionObserver.observe(section.current);
+      }
     });
 
-    indicatorObserver.observe(intro.current);
+    if (intro.current) {
+      indicatorObserver.observe(intro.current);
+    }
 
     return () => {
       sectionObserver.disconnect();
@@ -97,7 +104,7 @@ export const Home = () => {
           ],
         }}
       />
-      {/* <ProjectSummary
+      <ProjectSummary
         id="project-2"
         alternate
         sectionRef={projectTwo}
@@ -121,12 +128,12 @@ export const Home = () => {
             },
           ],
         }}
-      /> */}
+      />
       <ProjectSummary
         id="project-3"
         sectionRef={projectThree}
         visible={visibleSections.includes(projectThree.current)}
-        index={2}
+        index={3}
         title=" Automate"
         description="Website where user can automate their work by sending messages to slack/discord/notion all at one place.Also AI bot is there to help you out."
         buttonLink="/projects/slice"
@@ -142,14 +149,34 @@ export const Home = () => {
           ],
         }}
       />
+      <ProjectSummary
+        id="project-4"
+        alternate
+        sectionRef={projectFour}
+        visible={visibleSections.includes(projectFour.current)}
+        index={4}
+        title="Volkihar Knight"
+        description="A lore-friendly armor mod for The Elder Scrolls V: Skyrim. Released on PC and Xbox One with over one million downloads across both platforms."
+        buttonText="View project"
+        buttonLink="/projects/volkihar-knight"
+        model={{
+          type: 'laptop',
+          alt: 'Volkihar Knight armor mod',
+          textures: [
+            {
+              srcSet: [volkiharTexture, volkiharTextureLarge],
+              placeholder: volkiharTexturePlaceholder,
+            },
+          ],
+        }}
+      />
       <Profile
         sectionRef={details}
         visible={visibleSections.includes(details.current)}
         id="details"
       />
       <Footer />
-
-     <ChatbotIframe />
+      <ChatbotIframe />
     </div>
   );
 };

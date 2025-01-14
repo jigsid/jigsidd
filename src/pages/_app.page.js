@@ -81,16 +81,17 @@ const App = ({ Component, pageProps }) => {
             </VisuallyHidden>
             <Navbar />
             <main className={styles.app} tabIndex={-1} id="MainContent">
-              <AnimatePresence exitBeforeEnter>
+              <AnimatePresence mode="wait">
                 <m.div
                   key={route}
                   className={styles.page}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -30 }}
                   transition={{
-                    type: 'tween',
-                    ease: 'linear',
+                    type: 'spring',
+                    stiffness: 100,
+                    damping: 20,
                     duration: msToNum(tokens.base.durationS) / 1000,
                     delay: 0.1,
                   }}

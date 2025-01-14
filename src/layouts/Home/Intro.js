@@ -82,7 +82,7 @@ export function Intro({ id, sectionRef, disciplines, scrollIndicatorHidden, ...r
                   <span className={styles.line} data-status={status} />
                 </span>
                 <div className={styles.row} component="span">
-                  <AnimatePresence>
+                  <AnimatePresence mode="wait">
                     {disciplines.map(item => (
                       <Transition
                         unmount

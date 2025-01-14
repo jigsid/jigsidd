@@ -35,7 +35,7 @@
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
 
   @media (--mediaMobile) {
-    top: 30px;
+    top: 15px;
     right: 20px;
     width: 46px;
     height: 46px;
@@ -45,7 +45,7 @@
   }
 
   @media (--mediaTablet) {
-    top: 40px;
+    top: 25px;
     right: 80px;
     border-radius: 15px;
   }
