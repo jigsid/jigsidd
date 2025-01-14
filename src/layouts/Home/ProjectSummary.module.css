@@ -163,15 +163,15 @@
   filter: brightness(1) contrast(1.02);
 
   &[data-device='laptop'] {
-    top: 8%;
+    top: 3%;
     left: -25%;
     transform: translateZ(60px) rotateY(-8deg);
     filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.18));
 
     @nest .summary[data-alternate='true'] & {
       --width: 190%;
-      left: 35%;
-      top: 14%;
+      left: 20%;
+      top: 5%;
       transform: translateZ(60px) rotateY(-8deg);
     }
 
