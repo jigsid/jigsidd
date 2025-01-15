@@ -110,15 +110,29 @@ export const Model = ({
     scene.current.add(modelGroup.current);
 
     // Lighting
-    const ambientLight = new AmbientLight(0xffffff, 1.2);
+    const ambientLight = new AmbientLight(0xffffff, 0.3);
     const keyLight = new DirectionalLight(0xffffff, 1.1);
-    const fillLight = new DirectionalLight(0xffffff, 0.8);
-    const rimLight = new DirectionalLight(0xffffff, 0.5);
+    const fillLight = new DirectionalLight(0xffffff, 0.3);
+    const purpleRimLight = new DirectionalLight(0x9f6cf7, 4.0);
+    const purpleBackLight = new DirectionalLight(0x8a2be2, 2.5);
+    const purpleTopLight = new DirectionalLight(0xb66dff, 3.0);
+    const purpleFillLight = new DirectionalLight(0x9f6cf7, 2.2);
 
-    fillLight.position.set(-6, 2, 2);
-    keyLight.position.set(0.5, 0, 0.866);
-    rimLight.position.set(2, 1, -1);
-    lights.current = [ambientLight, keyLight, fillLight, rimLight];
+    fillLight.position.set(4, 2, 2);
+    keyLight.position.set(-2, 2, 1);
+    purpleRimLight.position.set(-3, 4, -2);
+    purpleBackLight.position.set(2, 1, -3);
+    purpleTopLight.position.set(0, 5, -3);
+    purpleFillLight.position.set(3, 3, 2);
+    
+    [keyLight, fillLight, purpleRimLight, purpleBackLight, purpleTopLight, purpleFillLight].forEach(light => {
+      light.castShadow = true;
+      light.shadow.bias = -0.001;
+      light.shadow.mapSize.width = 512;
+      light.shadow.mapSize.height = 512;
+    });
+
+    lights.current = [ambientLight, keyLight, fillLight, purpleRimLight, purpleBackLight, purpleTopLight, purpleFillLight];
     lights.current.forEach(light => scene.current.add(light));
 
     // The shadow container, if you need to move the plane just move this
@@ -131,8 +145,8 @@ export const Model = ({
     const planeWidth = 8;
     const planeHeight = 8;
     const cameraHeight = 1.5;
-    const shadowOpacity = 0.8;
-    const shadowDarkness = 3;
+    const shadowOpacity = 0.6;
+    const shadowDarkness = 2;
 
     // The render target that will show the shadows in the plane texture
     renderTarget.current = new WebGLRenderTarget(renderTargetSize, renderTargetSize);
@@ -147,10 +161,13 @@ export const Model = ({
       Math.PI / 2
     );
 
+    // Shadow plane material with adjusted properties
     const planeMaterial = new MeshBasicMaterial({
       map: renderTarget.current.texture,
       opacity: shadowOpacity,
       transparent: true,
+      blending: 2,  // Normal blending
+      depthWrite: false,  // Don't write to depth buffer
     });
 
     plane.current = new Mesh(planeGeometry, planeMaterial);
@@ -163,11 +180,12 @@ export const Model = ({
     blurPlane.current.visible = false;
     shadowGroup.current.add(blurPlane.current);
 
-    // The plane with the color of the ground
+    // Ground plane with adjusted properties
     const fillMaterial = new MeshBasicMaterial({
       color: 0xffffff,
       opacity: 0,
       transparent: true,
+      depthWrite: false,
     });
 
     fillPlane.current = new Mesh(planeGeometry, fillMaterial);
@@ -420,19 +438,48 @@ const Device = ({
 
       gltf.scene.traverse(async node => {
         if (node.material) {
-          node.material.color = new Color(0x1f2025);
+          // Enhanced black material with better edge definition
+          if (node.name === MeshType.Frame) {
+            node.material.color = new Color(0x0a0a0a);
+            node.material.metalness = 0.85;    // Slightly reduced metalness
+            node.material.roughness = 0.2;     // Increased for better detail
+            node.material.envMapIntensity = 2.5; // Increased for better reflections
+            node.material.emissive = new Color(0x0a0a0a);
+            node.material.emissiveIntensity = 0.2;  // Increased for better edges
+            // Add subtle normal map intensity for surface detail
+            if (node.material.normalScale) {
+              node.material.normalScale.set(0.5, 0.5);
+            }
+          } else {
+            node.material.color = new Color(0x0a0a0a);
+            node.material.metalness = 0.75;    // Reduced for better detail
+            node.material.roughness = 0.25;    // Increased for surface definition
+            node.material.envMapIntensity = 2.0;  // Balanced reflections
+          }
+          node.material.needsUpdate = true;
           node.material.color.convertSRGBToLinear();
         }
 
         if (node.name === MeshType.Screen) {
-          // Create a copy of the screen mesh so we can fade it out
-          // over the full resolution screen texture
+          // Create a copy of the screen mesh with enhanced properties
           placeholderScreen.current = node.clone();
           placeholderScreen.current.material = node.material.clone();
           node.parent.add(placeholderScreen.current);
           placeholderScreen.current.material.opacity = 1;
           placeholderScreen.current.position.z += 0.001;
 
+          // Screen material with enhanced visibility always on
+          node.material.metalness = 0.0;
+          node.material.roughness = 0.0;    // No roughness for clear image
+          node.material.envMapIntensity = 0.0;  // Remove environment reflections
+          node.material.emissive = new Color(0x000000);  // No emissive
+          node.material.emissiveIntensity = 0.05;  // Slight constant emissive
+          node.material.clearcoat = 0.0;     // Remove clearcoat
+          node.material.clearcoatRoughness = 0.0;
+          node.material.transparent = true;
+          node.material.opacity = 1.0;      // Fully opaque
+
+          // Remove hover effects since we want constant visibility
           applyScreenTexture(placeholder, placeholderScreen.current);
 
           loadFullResTexture = async () => {
