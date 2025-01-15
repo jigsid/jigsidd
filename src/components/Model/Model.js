@@ -109,30 +109,56 @@ export const Model = ({
     modelGroup.current = new Group();
     scene.current.add(modelGroup.current);
 
-    // Lighting
-    const ambientLight = new AmbientLight(0xffffff, 0.3);
-    const keyLight = new DirectionalLight(0xffffff, 1.1);
-    const fillLight = new DirectionalLight(0xffffff, 0.3);
-    const purpleRimLight = new DirectionalLight(0x9f6cf7, 4.0);
-    const purpleBackLight = new DirectionalLight(0x8a2be2, 2.5);
-    const purpleTopLight = new DirectionalLight(0xb66dff, 3.0);
-    const purpleFillLight = new DirectionalLight(0x9f6cf7, 2.2);
+    // Enhanced lighting setup
+    const ambientLight = new AmbientLight(0xffffff, 0.1);  // Minimal ambient for deeper contrast
+    const keyLight = new DirectionalLight(0xffffff, 0.7);   // Reduced key light
+    const fillLight = new DirectionalLight(0xffffff, 0.1);  // Minimal fill
 
-    fillLight.position.set(4, 2, 2);
+    // Main purple rim light for dramatic edge
+    const purpleRimLight = new DirectionalLight(0x9f6cf7, 6.5);  // Increased intensity
+    // Softer purple backlight for depth
+    const purpleBackLight = new DirectionalLight(0x8a2be2, 3.5);
+    // Accent purple light for subtle top highlight
+    const purpleTopLight = new DirectionalLight(0xb66dff, 1.5);
+    // Deep purple fill for subtle detail
+    const purpleFillLight = new DirectionalLight(0x6e3dc5, 2.0);
+    // Additional purple accent for edge definition
+    const purpleAccentLight = new DirectionalLight(0xc4a0ff, 2.5);
+
+    // Strategic light positioning
     keyLight.position.set(-2, 2, 1);
-    purpleRimLight.position.set(-3, 4, -2);
-    purpleBackLight.position.set(2, 1, -3);
-    purpleTopLight.position.set(0, 5, -3);
-    purpleFillLight.position.set(3, 3, 2);
+    fillLight.position.set(4, 2, 2);
     
-    [keyLight, fillLight, purpleRimLight, purpleBackLight, purpleTopLight, purpleFillLight].forEach(light => {
+    // Main purple rim light from left side
+    purpleRimLight.position.set(-5, 3, -1);
+    // Back light for depth
+    purpleBackLight.position.set(3, 2, -4);
+    // Top light for subtle highlight
+    purpleTopLight.position.set(0, 5, -2);
+    // Fill light for subtle detail
+    purpleFillLight.position.set(4, 1, 1);
+    // Accent light for edge definition
+    purpleAccentLight.position.set(-3, 4, 2);
+    
+    // Enhanced shadow and light properties
+    [keyLight, fillLight, purpleRimLight, purpleBackLight, purpleTopLight, purpleFillLight, purpleAccentLight].forEach(light => {
       light.castShadow = true;
       light.shadow.bias = -0.001;
       light.shadow.mapSize.width = 512;
       light.shadow.mapSize.height = 512;
+      light.shadow.radius = 8;  // Softer shadows
     });
 
-    lights.current = [ambientLight, keyLight, fillLight, purpleRimLight, purpleBackLight, purpleTopLight, purpleFillLight];
+    lights.current = [
+      ambientLight, 
+      keyLight, 
+      fillLight, 
+      purpleRimLight, 
+      purpleBackLight, 
+      purpleTopLight, 
+      purpleFillLight,
+      purpleAccentLight
+    ];
     lights.current.forEach(light => scene.current.add(light));
 
     // The shadow container, if you need to move the plane just move this
