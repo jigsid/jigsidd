@@ -101,6 +101,7 @@ export const ProjectSummary = ({
               models={[
                 {
                   ...deviceModels.laptop,
+                  position: { x: 0, y: -0.1, z: 0 },
                   texture: {
                     ...model.textures[0],
                     sizes: laptopSizes,

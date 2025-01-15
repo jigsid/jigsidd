@@ -15,8 +15,10 @@ export const deviceModels = {
     height: 512,
     position: { x: 0, y: 0, z: 0 },
     animation: ModelAnimationType.FloatAndRotate,
-    rotationIntensity: 0.5,
-    floatIntensity: 0.2
+    rotationIntensity: 0.8,
+    floatIntensity: 0.4,
+    hoverIntensity: 1.2,
+    type: 'phone-model'
   },
   laptop: {
     url: macbookPro,
@@ -24,7 +26,9 @@ export const deviceModels = {
     height: 800,
     position: { x: 0, y: 0, z: 0 },
     animation: ModelAnimationType.SmoothReveal,
-    rotationIntensity: 0.3,
-    floatIntensity: 0.1
+    rotationIntensity: 0.6,
+    floatIntensity: 0.3,
+    hoverIntensity: 1.5,
+    type: 'laptop-model'
   },
 };

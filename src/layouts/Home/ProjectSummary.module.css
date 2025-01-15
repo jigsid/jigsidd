@@ -163,7 +163,7 @@
   filter: brightness(1) contrast(1.02);
 
   &[data-device='laptop'] {
-    top: 3%;
+    top: 5%;
     left: -25%;
     transform: translateZ(60px) rotateY(-8deg);
     filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.18));
@@ -171,13 +171,13 @@
     @nest .summary[data-alternate='true'] & {
       --width: 190%;
       left: 20%;
-      top: 5%;
+      top: 6%;
       transform: translateZ(60px) rotateY(-8deg);
     }
 
     @media (--mediaTablet) {
       --width: 140%;
-      top: 0;
+      top: 2%;
       left: 0;
       transform: none;
       filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15));
@@ -186,7 +186,7 @@
     @media (--mediaMobile) {
       --width: 100%;
       margin: 0 auto;
-      top: 0;
+      top: 2%;
       left: 0;
     }
   }

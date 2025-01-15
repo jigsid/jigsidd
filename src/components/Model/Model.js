@@ -392,12 +392,31 @@ const Device = ({
       let loadFullResTexture;
       let playAnimation;
 
+      // Clean up any existing models first
+      if (modelGroup.current) {
+        modelGroup.current.children.forEach(child => {
+          if (child.userData.type === model.type) {
+            modelGroup.current.remove(child);
+            child.traverse(node => {
+              if (node.material) node.material.dispose();
+              if (node.geometry) node.geometry.dispose();
+            });
+          }
+        });
+      }
+
       const [placeholder, gltf] = await Promise.all([
         await textureLoader.loadAsync(texture.placeholder.src),
         await modelLoader.loadAsync(url),
       ]);
 
+      // Tag the model with its type for future cleanup
+      gltf.scene.userData.type = model.type;
       modelGroup.current.add(gltf.scene);
+
+      // Ensure proper initial position
+      gltf.scene.position.set(position.x, position.y, position.z);
+      gltf.scene.rotation.set(0, 0, 0);
 
       gltf.scene.traverse(async node => {
         if (node.material) {
@@ -423,8 +442,16 @@ const Device = ({
 
             animate(1, 0, {
               onUpdate: value => {
-                placeholderScreen.current.material.opacity = value;
-                renderFrame();
+                if (placeholderScreen.current) {
+                  placeholderScreen.current.material.opacity = value;
+                  renderFrame();
+                }
+              },
+              onComplete: () => {
+                if (placeholderScreen.current && placeholderScreen.current.parent) {
+                  placeholderScreen.current.parent.remove(placeholderScreen.current);
+                  placeholderScreen.current.material.dispose();
+                }
               },
             });
           };
@@ -498,25 +525,37 @@ const Device = ({
           
           const startPosition = new Vector3(
             targetPosition.x,
-            targetPosition.y - 1,
+            targetPosition.y - 2,
             targetPosition.z
           );
 
           gltf.scene.position.set(...startPosition.toArray());
 
-          // Float animation
+          // Enhanced float animation
           return animate(startPosition.y, targetPosition.y, {
             type: 'spring',
             delay: (300 * index + showDelay) / 1000,
-            stiffness: 50,
-            damping: 15,
-            mass: 1,
+            stiffness: 40,
+            damping: 12,
+            mass: 1.2,
             restSpeed: 0.0001,
             restDelta: 0.0001,
             onUpdate: value => {
               if (!gltf?.scene) return;
-              gltf.scene.position.y = value + Math.sin(Date.now() * 0.003) * (model.floatIntensity || 0.2);
-              gltf.scene.rotation.y = Math.sin(Date.now() * 0.002) * 0.1 * (model.rotationIntensity || 0.5);
+              const time = Date.now();
+              // Complex motion combining multiple sine waves
+              const floatY = Math.sin(time * 0.003) * (model.floatIntensity || 0.4) +
+                            Math.sin(time * 0.007) * (model.floatIntensity || 0.4) * 0.5;
+              
+              // Smooth rotation with multiple axes
+              const rotationX = Math.sin(time * 0.002) * 0.05 * (model.rotationIntensity || 0.8);
+              const rotationY = Math.sin(time * 0.003) * 0.15 * (model.rotationIntensity || 0.8);
+              const rotationZ = Math.cos(time * 0.002) * 0.05 * (model.rotationIntensity || 0.8);
+
+              gltf.scene.position.y = value + floatY;
+              gltf.scene.rotation.x = rotationX;
+              gltf.scene.rotation.y = rotationY;
+              gltf.scene.rotation.z = rotationZ;
               renderFrame();
             },
           });
@@ -534,24 +573,53 @@ const Device = ({
           
           if (!frameNode) return;
           
-          const startRotation = new Vector3(MathUtils.degToRad(120), 0, 0);
+          const startRotation = new Vector3(
+            MathUtils.degToRad(160), // Reduced from 180 for faster start
+            MathUtils.degToRad(5),   // Reduced rotation for consistency
+            0                        // Removed initial tilt for stability
+          );
           const endRotation = new Vector3(0, 0, 0);
 
           gltf.scene.position.set(...targetPosition.toArray());
           frameNode.rotation.set(...startRotation.toArray());
 
-          // Smooth reveal animation
+          // Simplified scale animation with faster timing
+          gltf.scene.scale.set(0.98, 0.98, 0.98); // Less scale difference
+          animate(0.98, 1, {
+            type: 'spring',
+            delay: (100 * index + showDelay) / 1000, // Reduced delay
+            stiffness: 80,  // Increased stiffness
+            damping: 20,    // Increased damping
+            mass: 1,        // Reduced mass
+            onUpdate: value => {
+              if (!gltf?.scene) return;
+              gltf.scene.scale.set(value, value, value);
+            },
+          });
+
+          // Main opening animation
           return animate(startRotation.x, endRotation.x, {
             type: 'spring',
-            delay: (300 * index + showDelay + 300) / 1000,
-            stiffness: 60,
-            damping: 15,
-            restSpeed: 0.0001,
-            restDelta: 0.0001,
+            delay: (100 * index + showDelay) / 1000, // Reduced delay
+            stiffness: 80,    // Increased for snappier response
+            damping: 20,      // Balanced damping
+            mass: 1,          // Reduced mass for faster movement
+            restSpeed: 0.001, // Increased rest speed
+            restDelta: 0.001, // Increased rest delta
             onUpdate: value => {
               if (!frameNode || !gltf?.scene) return;
+              
+              // Simplified progress calculation
+              const progress = 1 - (value / startRotation.x);
+              
+              // Basic rotation with reduced complexity
               frameNode.rotation.x = value;
-              gltf.scene.position.y = targetPosition.y + Math.sin(Date.now() * 0.002) * (model.floatIntensity || 0.1);
+              frameNode.rotation.y = startRotation.y * (1 - progress);
+              
+              // Simplified floating effect
+              const floatY = Math.sin(Date.now() * 0.002) * 0.02 * progress;
+              gltf.scene.position.y = targetPosition.y + floatY;
+              
               renderFrame();
             },
           });
@@ -592,6 +660,11 @@ const Device = ({
 
     return () => {
       animation?.stop();
+      // Clean up placeholder screen
+      if (placeholderScreen.current && placeholderScreen.current.parent) {
+        placeholderScreen.current.parent.remove(placeholderScreen.current);
+        placeholderScreen.current.material.dispose();
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadDevice, show]);
