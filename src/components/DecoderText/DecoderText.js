@@ -40,13 +40,18 @@ function shuffle(content, output, position) {
       return { type: CharType.Glyph, value: glyphs[rand] };
     }
 
+    if (!output[index] || !output[index].value) {
+      const rand = Math.floor(Math.random() * glyphs.length);
+      return { type: CharType.Glyph, value: glyphs[rand] };
+    }
+
     return { type: CharType.Glyph, value: output[index].value };
   });
 }
 
 export const DecoderText = memo(
   ({ text, start = true, delay: startDelay = 0, className, ...rest }) => {
-    const output = useRef([{ type: CharType.Glyph, value: '' }]);
+    const output = useRef(Array(text.length).fill({ type: CharType.Glyph, value: '' }));
     const container = useRef();
     const reduceMotion = useReducedMotion();
     const decoderSpring = useSpring(0, { stiffness: 8, damping: 5 });

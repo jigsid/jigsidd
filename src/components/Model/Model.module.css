@@ -1,38 +1,192 @@
 .model {
   position: relative;
-  opacity: 0;
-  transform: translateY(40px) scale(0.9);
-  transition: transform 1s cubic-bezier(0.23, 1, 0.32, 1);
   will-change: transform, opacity;
   perspective: 1000px;
+  min-height: clamp(300px, 50vh, 600px);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-  &[data-loaded='true']:global {
-    animation: fadeIn 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards var(--delay);
-    transform: translateY(0) scale(1);
-  }
+.model:not([data-loaded='true']) {
+  opacity: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 10, 0.2) 0%,
+    rgba(10, 10, 10, 0.4) 100%
+  );
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.model[data-loaded='true'] {
+  animation: fadeIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards var(--delay);
 }
 
 .canvas {
   position: absolute;
   inset: 0;
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  opacity: 0;
+  transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   transform-style: preserve-3d;
+  border-radius: 24px;
+  overflow: hidden;
+}
 
+.model[data-loaded='true'] .canvas {
+  opacity: 1;
   &:hover {
-    filter: brightness(1.2) contrast(1.1);
-    transform: scale(1.02);
+    filter: brightness(1.1) contrast(1.05) saturate(1.05);
+    transform: scale(1.01) translateY(-2px);
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.12),
+      0 8px 16px rgba(0, 0, 0, 0.1);
   }
 }
 
 @keyframes fadeIn {
   0% {
-    opacity: 0;
-    transform: translateY(40px) scale(0.9);
-    filter: blur(10px);
+    transform: translateY(30px) scale(0.95);
+    filter: blur(8px);
   }
   100% {
-    opacity: 1;
     transform: translateY(0) scale(1);
     filter: blur(0);
+  }
+}
+
+.loadingContainer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 10, 0.2) 0%,
+    rgba(10, 10, 10, 0.4) 100%
+  );
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  pointer-events: none;
+  border-radius: 24px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  gap: 24px;
+}
+
+.spinner {
+  position: relative;
+  width: clamp(40px, 8vw, 56px);
+  height: clamp(40px, 8vw, 56px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinnerOuter {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 3px solid rgba(159, 108, 247, 0.1);
+  border-top-color: rgb(159, 108, 247);
+  border-radius: 50%;
+  animation: spin 1s cubic-bezier(0.17, 0.67, 0.83, 0.67) infinite;
+  box-shadow: 
+    0 0 20px rgba(159, 108, 247, 0.3),
+    0 0 40px rgba(159, 108, 247, 0.1);
+}
+
+.spinnerInner {
+  position: absolute;
+  width: 60%;
+  height: 60%;
+  border: 2px solid rgba(159, 108, 247, 0.1);
+  border-bottom-color: rgb(159, 108, 247);
+  border-radius: 50%;
+  animation: spinReverse 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67) infinite;
+}
+
+.spinnerCenter {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgb(159, 108, 247);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.loadingText {
+  font-size: clamp(14px, 2vw, 16px);
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: 500;
+  animation: fadeInOut 2s ease-in-out infinite;
+  text-shadow: 0 0 10px rgba(159, 108, 247, 0.5);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(230deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinReverse {
+  0% {
+    transform: rotate(360deg);
+  }
+  50% {
+    transform: rotate(130deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .model {
+    min-height: clamp(250px, 40vh, 400px);
+  }
+  
+  .loadingContainer {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .model {
+    min-height: clamp(200px, 35vh, 300px);
+  }
+  
+  .loadingContainer {
+    gap: 12px;
   }
 }

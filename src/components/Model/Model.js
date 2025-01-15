@@ -110,7 +110,10 @@ export const Model = ({
   useEffect(() => {
     if (models) {
       const modelUrls = Array.isArray(models) ? models.map(m => m.url) : [models.url];
-      Promise.all(modelUrls.map(url => preloadModel(url)));
+      Promise.all(modelUrls.map(url => preloadModel(url)))
+        .catch(error => {
+          console.error('Error loading models:', error);
+        });
     }
   }, [models]);
 
@@ -416,16 +419,20 @@ export const Model = ({
 
   return (
     <div
+      ref={container}
       className={classes(styles.model, className)}
       data-loaded={loaded}
       style={cssProps({ delay: numToMs(showDelay) }, style)}
-      ref={container}
       role="img"
       aria-label={alt}
       {...rest}
     >
-      <canvas className={styles.canvas} ref={canvas} />
-      {models.map((model, index) => (
+      <canvas
+        className={styles.canvas}
+        ref={canvas}
+        tabIndex={-1}
+      />
+      {Array.isArray(models) ? models.map((model, index) => (
         <Device
           key={JSON.stringify(model.position)}
           renderer={renderer}
@@ -437,7 +444,28 @@ export const Model = ({
           setLoaded={setLoaded}
           model={model}
         />
-      ))}
+      )) : (
+        <Device
+          renderer={renderer}
+          modelGroup={modelGroup}
+          show={show}
+          showDelay={showDelay}
+          renderFrame={renderFrame}
+          index={0}
+          setLoaded={setLoaded}
+          model={models}
+        />
+      )}
+      {!loaded && (
+        <div className={styles.loadingContainer} aria-hidden="true">
+          <div className={styles.spinner}>
+            <div className={styles.spinnerOuter} />
+            <div className={styles.spinnerInner} />
+            <div className={styles.spinnerCenter} />
+          </div>
+          <div className={styles.loadingText}>Loading</div>
+        </div>
+      )}
     </div>
   );
 };
@@ -473,279 +501,283 @@ const Device = ({
 
     // Generate promises to await when ready
     const load = async () => {
-      const { texture, position, url } = model;
-      let loadFullResTexture;
-      let playAnimation;
+      try {
+        const { texture, position, url } = model;
+        let loadFullResTexture;
+        let playAnimation;
 
-      // Clean up any existing models first
-      if (modelGroup.current) {
-        modelGroup.current.children.forEach(child => {
-          if (child.userData.type === model.type) {
-            modelGroup.current.remove(child);
-            child.traverse(node => {
-              if (node.material) node.material.dispose();
-              if (node.geometry) node.geometry.dispose();
-            });
-          }
-        });
-      }
-
-      const [placeholder, gltf] = await Promise.all([
-        await textureLoader.loadAsync(texture.placeholder.src),
-        await modelLoader.loadAsync(url),
-      ]);
-
-      // Tag the model with its type for future cleanup
-      gltf.scene.userData.type = model.type;
-      modelGroup.current.add(gltf.scene);
-
-      // Ensure proper initial position
-      gltf.scene.position.set(position.x, position.y, position.z);
-      gltf.scene.rotation.set(0, 0, 0);
-
-      gltf.scene.traverse(async node => {
-        if (node.material) {
-          // Enhanced black material with better edge definition
-          if (node.name === MeshType.Frame) {
-            node.material.color = new Color(0x0a0a0a);
-            node.material.metalness = 0.85;    // Slightly reduced metalness
-            node.material.roughness = 0.2;     // Increased for better detail
-            node.material.envMapIntensity = 2.5; // Increased for better reflections
-            node.material.emissive = new Color(0x0a0a0a);
-            node.material.emissiveIntensity = 0.2;  // Increased for better edges
-            // Add subtle normal map intensity for surface detail
-            if (node.material.normalScale) {
-              node.material.normalScale.set(0.5, 0.5);
+        // Clean up any existing models first
+        if (modelGroup.current) {
+          modelGroup.current.children.forEach(child => {
+            if (child.userData.type === model.type) {
+              modelGroup.current.remove(child);
+              child.traverse(node => {
+                if (node.material) node.material.dispose();
+                if (node.geometry) node.geometry.dispose();
+              });
             }
-          } else {
-            node.material.color = new Color(0x0a0a0a);
-            node.material.metalness = 0.75;    // Reduced for better detail
-            node.material.roughness = 0.25;    // Increased for surface definition
-            node.material.envMapIntensity = 2.0;  // Balanced reflections
-          }
-          node.material.needsUpdate = true;
-          node.material.color.convertSRGBToLinear();
+          });
         }
 
-        if (node.name === MeshType.Screen) {
-          // Create a copy of the screen mesh with enhanced properties
-          placeholderScreen.current = node.clone();
-          placeholderScreen.current.material = node.material.clone();
-          node.parent.add(placeholderScreen.current);
-          placeholderScreen.current.material.opacity = 1;
-          placeholderScreen.current.position.z += 0.001;
+        const [placeholder, gltf] = await Promise.all([
+          textureLoader.loadAsync(texture.placeholder.src),
+          modelLoader.loadAsync(url),
+        ]);
 
-          // Screen material with enhanced visibility always on
-          node.material.metalness = 0.0;
-          node.material.roughness = 0.0;    // No roughness for clear image
-          node.material.envMapIntensity = 0.0;  // Remove environment reflections
-          node.material.emissive = new Color(0x000000);  // No emissive
-          node.material.emissiveIntensity = 0.05;  // Slight constant emissive
-          node.material.clearcoat = 0.0;     // Remove clearcoat
-          node.material.clearcoatRoughness = 0.0;
-          node.material.transparent = true;
-          node.material.opacity = 1.0;      // Fully opaque
+        // Tag the model with its type for future cleanup
+        gltf.scene.userData.type = model.type;
+        modelGroup.current.add(gltf.scene);
 
-          // Remove hover effects since we want constant visibility
-          applyScreenTexture(placeholder, placeholderScreen.current);
+        // Ensure proper initial position
+        gltf.scene.position.set(position.x, position.y, position.z);
+        gltf.scene.rotation.set(0, 0, 0);
 
-          loadFullResTexture = async () => {
-            const image = await resolveSrcFromSrcSet(texture);
-            const fullSize = await textureLoader.loadAsync(image);
-            await applyScreenTexture(fullSize, node);
+        gltf.scene.traverse(async node => {
+          if (node.material) {
+            // Enhanced black material with better edge definition
+            if (node.name === MeshType.Frame) {
+              node.material.color = new Color(0x0a0a0a);
+              node.material.metalness = 0.85;    // Slightly reduced metalness
+              node.material.roughness = 0.2;     // Increased for better detail
+              node.material.envMapIntensity = 2.5; // Increased for better reflections
+              node.material.emissive = new Color(0x0a0a0a);
+              node.material.emissiveIntensity = 0.2;  // Increased for better edges
+              // Add subtle normal map intensity for surface detail
+              if (node.material.normalScale) {
+                node.material.normalScale.set(0.5, 0.5);
+              }
+            } else {
+              node.material.color = new Color(0x0a0a0a);
+              node.material.metalness = 0.75;    // Reduced for better detail
+              node.material.roughness = 0.25;    // Increased for surface definition
+              node.material.envMapIntensity = 2.0;  // Balanced reflections
+            }
+            node.material.needsUpdate = true;
+            node.material.color.convertSRGBToLinear();
+          }
 
-            animate(1, 0, {
+          if (node.name === MeshType.Screen) {
+            // Create a copy of the screen mesh with enhanced properties
+            placeholderScreen.current = node.clone();
+            placeholderScreen.current.material = node.material.clone();
+            node.parent.add(placeholderScreen.current);
+            placeholderScreen.current.material.opacity = 1;
+            placeholderScreen.current.position.z += 0.001;
+
+            // Screen material with enhanced visibility always on
+            node.material.metalness = 0.0;
+            node.material.roughness = 0.0;    // No roughness for clear image
+            node.material.envMapIntensity = 0.0;  // Remove environment reflections
+            node.material.emissive = new Color(0x000000);  // No emissive
+            node.material.emissiveIntensity = 0.05;  // Slight constant emissive
+            node.material.clearcoat = 0.0;     // Remove clearcoat
+            node.material.clearcoatRoughness = 0.0;
+            node.material.transparent = true;
+            node.material.opacity = 1.0;      // Fully opaque
+
+            // Remove hover effects since we want constant visibility
+            applyScreenTexture(placeholder, placeholderScreen.current);
+
+            loadFullResTexture = async () => {
+              const image = await resolveSrcFromSrcSet(texture);
+              const fullSize = await textureLoader.loadAsync(image);
+              await applyScreenTexture(fullSize, node);
+
+              animate(1, 0, {
+                onUpdate: value => {
+                  if (placeholderScreen.current) {
+                    placeholderScreen.current.material.opacity = value;
+                    renderFrame();
+                  }
+                },
+                onComplete: () => {
+                  if (placeholderScreen.current && placeholderScreen.current.parent) {
+                    placeholderScreen.current.parent.remove(placeholderScreen.current);
+                    placeholderScreen.current.material.dispose();
+                  }
+                },
+              });
+            };
+          }
+        });
+
+        const targetPosition = new Vector3(position.x, position.y, position.z);
+
+        if (reduceMotion) {
+          gltf.scene.position.set(...targetPosition.toArray());
+        }
+
+        // Simple slide up animation
+        if (model.animation === ModelAnimationType.SpringUp) {
+          playAnimation = () => {
+            const startPosition = new Vector3(
+              targetPosition.x,
+              targetPosition.y - 1,
+              targetPosition.z
+            );
+
+            gltf.scene.position.set(...startPosition.toArray());
+
+            animate(startPosition.y, targetPosition.y, {
+              type: 'spring',
+              delay: (300 * index + showDelay) / 1000,
+              stiffness: 60,
+              damping: 20,
+              mass: 1,
+              restSpeed: 0.0001,
+              restDelta: 0.0001,
               onUpdate: value => {
-                if (placeholderScreen.current) {
-                  placeholderScreen.current.material.opacity = value;
-                  renderFrame();
-                }
-              },
-              onComplete: () => {
-                if (placeholderScreen.current && placeholderScreen.current.parent) {
-                  placeholderScreen.current.parent.remove(placeholderScreen.current);
-                  placeholderScreen.current.material.dispose();
-                }
+                gltf.scene.position.y = value;
+                renderFrame();
               },
             });
           };
         }
-      });
 
-      const targetPosition = new Vector3(position.x, position.y, position.z);
+        // Swing the laptop lid open
+        if (model.animation === ModelAnimationType.LaptopOpen) {
+          playAnimation = () => {
+            const frameNode = gltf.scene.children.find(
+              node => node.name === MeshType.Frame
+            );
+            const startRotation = new Vector3(MathUtils.degToRad(90), 0, 0);
+            const endRotation = new Vector3(0, 0, 0);
 
-      if (reduceMotion) {
-        gltf.scene.position.set(...targetPosition.toArray());
+            gltf.scene.position.set(...targetPosition.toArray());
+            frameNode.rotation.set(...startRotation.toArray());
+
+            return animate(startRotation.x, endRotation.x, {
+              type: 'spring',
+              delay: (300 * index + showDelay + 300) / 1000,
+              stiffness: 80,
+              damping: 20,
+              restSpeed: 0.0001,
+              restDelta: 0.0001,
+              onUpdate: value => {
+                frameNode.rotation.x = value;
+                renderFrame();
+              },
+            });
+          };
+        }
+
+        // Float and rotate animation
+        if (model.animation === ModelAnimationType.FloatAndRotate) {
+          playAnimation = () => {
+            if (!gltf?.scene) return;
+            
+            const startPosition = new Vector3(
+              targetPosition.x,
+              targetPosition.y - 2,
+              targetPosition.z
+            );
+
+            gltf.scene.position.set(...startPosition.toArray());
+
+            // Enhanced float animation
+            return animate(startPosition.y, targetPosition.y, {
+              type: 'spring',
+              delay: (300 * index + showDelay) / 1000,
+              stiffness: 40,
+              damping: 12,
+              mass: 1.2,
+              restSpeed: 0.0001,
+              restDelta: 0.0001,
+              onUpdate: value => {
+                if (!gltf?.scene) return;
+                const time = Date.now();
+                // Complex motion combining multiple sine waves
+                const floatY = Math.sin(time * 0.003) * (model.floatIntensity || 0.4) +
+                              Math.sin(time * 0.007) * (model.floatIntensity || 0.4) * 0.5;
+                
+                // Smooth rotation with multiple axes
+                const rotationX = Math.sin(time * 0.002) * 0.05 * (model.rotationIntensity || 0.8);
+                const rotationY = Math.sin(time * 0.003) * 0.15 * (model.rotationIntensity || 0.8);
+                const rotationZ = Math.cos(time * 0.002) * 0.05 * (model.rotationIntensity || 0.8);
+
+                gltf.scene.position.y = value + floatY;
+                gltf.scene.rotation.x = rotationX;
+                gltf.scene.rotation.y = rotationY;
+                gltf.scene.rotation.z = rotationZ;
+                renderFrame();
+              },
+            });
+          };
+        }
+
+        // Smooth reveal animation
+        if (model.animation === ModelAnimationType.SmoothReveal) {
+          playAnimation = () => {
+            if (!gltf?.scene) return;
+            
+            const frameNode = gltf.scene.children.find(
+              node => node.name === MeshType.Frame
+            );
+            
+            if (!frameNode) return;
+            
+            const startRotation = new Vector3(
+              MathUtils.degToRad(160), // Reduced from 180 for faster start
+              MathUtils.degToRad(5),   // Reduced rotation for consistency
+              0                        // Removed initial tilt for stability
+            );
+            const endRotation = new Vector3(0, 0, 0);
+
+            gltf.scene.position.set(...targetPosition.toArray());
+            frameNode.rotation.set(...startRotation.toArray());
+
+            // Simplified scale animation with faster timing
+            gltf.scene.scale.set(0.98, 0.98, 0.98); // Less scale difference
+            animate(0.98, 1, {
+              type: 'spring',
+              delay: (100 * index + showDelay) / 1000, // Reduced delay
+              stiffness: 80,  // Increased stiffness
+              damping: 20,    // Increased damping
+              mass: 1,        // Reduced mass
+              onUpdate: value => {
+                if (!gltf?.scene) return;
+                gltf.scene.scale.set(value, value, value);
+              },
+            });
+
+            // Main opening animation
+            return animate(startRotation.x, endRotation.x, {
+              type: 'spring',
+              delay: (100 * index + showDelay) / 1000, // Reduced delay
+              stiffness: 80,    // Increased for snappier response
+              damping: 20,      // Balanced damping
+              mass: 1,          // Reduced mass for faster movement
+              restSpeed: 0.001, // Increased rest speed
+              restDelta: 0.001, // Increased rest delta
+              onUpdate: value => {
+                if (!frameNode || !gltf?.scene) return;
+                
+                // Simplified progress calculation
+                const progress = 1 - (value / startRotation.x);
+                
+                // Basic rotation with reduced complexity
+                frameNode.rotation.x = value;
+                frameNode.rotation.y = startRotation.y * (1 - progress);
+                
+                // Simplified floating effect
+                const floatY = Math.sin(Date.now() * 0.002) * 0.02 * progress;
+                gltf.scene.position.y = targetPosition.y + floatY;
+                
+                renderFrame();
+              },
+            });
+          };
+        }
+
+        return { loadFullResTexture, playAnimation };
+      } catch (error) {
+        console.error('Error loading device:', error);
+        setLoaded(false);  // Keep loading state if there's an error
+        throw error;
       }
-
-      // Simple slide up animation
-      if (model.animation === ModelAnimationType.SpringUp) {
-        playAnimation = () => {
-          const startPosition = new Vector3(
-            targetPosition.x,
-            targetPosition.y - 1,
-            targetPosition.z
-          );
-
-          gltf.scene.position.set(...startPosition.toArray());
-
-          animate(startPosition.y, targetPosition.y, {
-            type: 'spring',
-            delay: (300 * index + showDelay) / 1000,
-            stiffness: 60,
-            damping: 20,
-            mass: 1,
-            restSpeed: 0.0001,
-            restDelta: 0.0001,
-            onUpdate: value => {
-              gltf.scene.position.y = value;
-              renderFrame();
-            },
-          });
-        };
-      }
-
-      // Swing the laptop lid open
-      if (model.animation === ModelAnimationType.LaptopOpen) {
-        playAnimation = () => {
-          const frameNode = gltf.scene.children.find(
-            node => node.name === MeshType.Frame
-          );
-          const startRotation = new Vector3(MathUtils.degToRad(90), 0, 0);
-          const endRotation = new Vector3(0, 0, 0);
-
-          gltf.scene.position.set(...targetPosition.toArray());
-          frameNode.rotation.set(...startRotation.toArray());
-
-          return animate(startRotation.x, endRotation.x, {
-            type: 'spring',
-            delay: (300 * index + showDelay + 300) / 1000,
-            stiffness: 80,
-            damping: 20,
-            restSpeed: 0.0001,
-            restDelta: 0.0001,
-            onUpdate: value => {
-              frameNode.rotation.x = value;
-              renderFrame();
-            },
-          });
-        };
-      }
-
-      // Float and rotate animation
-      if (model.animation === ModelAnimationType.FloatAndRotate) {
-        playAnimation = () => {
-          if (!gltf?.scene) return;
-          
-          const startPosition = new Vector3(
-            targetPosition.x,
-            targetPosition.y - 2,
-            targetPosition.z
-          );
-
-          gltf.scene.position.set(...startPosition.toArray());
-
-          // Enhanced float animation
-          return animate(startPosition.y, targetPosition.y, {
-            type: 'spring',
-            delay: (300 * index + showDelay) / 1000,
-            stiffness: 40,
-            damping: 12,
-            mass: 1.2,
-            restSpeed: 0.0001,
-            restDelta: 0.0001,
-            onUpdate: value => {
-              if (!gltf?.scene) return;
-              const time = Date.now();
-              // Complex motion combining multiple sine waves
-              const floatY = Math.sin(time * 0.003) * (model.floatIntensity || 0.4) +
-                            Math.sin(time * 0.007) * (model.floatIntensity || 0.4) * 0.5;
-              
-              // Smooth rotation with multiple axes
-              const rotationX = Math.sin(time * 0.002) * 0.05 * (model.rotationIntensity || 0.8);
-              const rotationY = Math.sin(time * 0.003) * 0.15 * (model.rotationIntensity || 0.8);
-              const rotationZ = Math.cos(time * 0.002) * 0.05 * (model.rotationIntensity || 0.8);
-
-              gltf.scene.position.y = value + floatY;
-              gltf.scene.rotation.x = rotationX;
-              gltf.scene.rotation.y = rotationY;
-              gltf.scene.rotation.z = rotationZ;
-              renderFrame();
-            },
-          });
-        };
-      }
-
-      // Smooth reveal animation
-      if (model.animation === ModelAnimationType.SmoothReveal) {
-        playAnimation = () => {
-          if (!gltf?.scene) return;
-          
-          const frameNode = gltf.scene.children.find(
-            node => node.name === MeshType.Frame
-          );
-          
-          if (!frameNode) return;
-          
-          const startRotation = new Vector3(
-            MathUtils.degToRad(160), // Reduced from 180 for faster start
-            MathUtils.degToRad(5),   // Reduced rotation for consistency
-            0                        // Removed initial tilt for stability
-          );
-          const endRotation = new Vector3(0, 0, 0);
-
-          gltf.scene.position.set(...targetPosition.toArray());
-          frameNode.rotation.set(...startRotation.toArray());
-
-          // Simplified scale animation with faster timing
-          gltf.scene.scale.set(0.98, 0.98, 0.98); // Less scale difference
-          animate(0.98, 1, {
-            type: 'spring',
-            delay: (100 * index + showDelay) / 1000, // Reduced delay
-            stiffness: 80,  // Increased stiffness
-            damping: 20,    // Increased damping
-            mass: 1,        // Reduced mass
-            onUpdate: value => {
-              if (!gltf?.scene) return;
-              gltf.scene.scale.set(value, value, value);
-            },
-          });
-
-          // Main opening animation
-          return animate(startRotation.x, endRotation.x, {
-            type: 'spring',
-            delay: (100 * index + showDelay) / 1000, // Reduced delay
-            stiffness: 80,    // Increased for snappier response
-            damping: 20,      // Balanced damping
-            mass: 1,          // Reduced mass for faster movement
-            restSpeed: 0.001, // Increased rest speed
-            restDelta: 0.001, // Increased rest delta
-            onUpdate: value => {
-              if (!frameNode || !gltf?.scene) return;
-              
-              // Simplified progress calculation
-              const progress = 1 - (value / startRotation.x);
-              
-              // Basic rotation with reduced complexity
-              frameNode.rotation.x = value;
-              frameNode.rotation.y = startRotation.y * (1 - progress);
-              
-              // Simplified floating effect
-              const floatY = Math.sin(Date.now() * 0.002) * 0.02 * progress;
-              gltf.scene.position.y = targetPosition.y + floatY;
-              
-              renderFrame();
-            },
-          });
-        };
-      }
-
-      return { loadFullResTexture, playAnimation };
     };
 
     setLoadDevice({ start: load });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
