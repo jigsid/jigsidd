@@ -78,7 +78,7 @@ export function VolkiharKnight() {
           title={title}
           description={description}
           linkLabel="Get the mod"
-          url="https://www.nexusmods.com/skyrimspecialedition/mods/4806/"
+          url="mishra19.netlify.app"
           roles={roles}
         />
         <ProjectSection>
@@ -108,18 +108,9 @@ export function VolkiharKnight() {
             </div>
             <div className={styles.textSection}>
               <ProjectSectionHeading>Armor design</ProjectSectionHeading>
+              
               <ProjectSectionText>
-                As a player I noticed there weren’t any heavy armor options for the
-                Volkihar faction. This kinda sucks when you’ve specialised in heavy armor
-                and decide to join the faction and discover they all wear light armor.
-              </ProjectSectionText>
-              <ProjectSectionText>
-                My solution was to create a mod that combines meshes from the Volkihar
-                faction armor with heavy plate armor. The mod builds upon textures and
-                meshes from the base game, so it unifies with Skyrim’s overall aesthetic.
-                I combined and modified the meshes in 3DS Max. To establish a cohesive
-                design across the set, I edited existing textures, and designed custom
-                textures in Photoshop.
+                test
               </ProjectSectionText>
             </div>
           </ProjectSectionColumns>
@@ -189,16 +180,13 @@ export function VolkiharKnight() {
               />
               <ProjectSectionHeading>Featured in Enderal</ProjectSectionHeading>
               <ProjectSectionText>
-                I was super stoked to have my work featured in the major standalone mod
-                Enderal, which won best fan creation at the game awards in 2016. Within
-                the game my armor design can be found being used for the Wandering Mage
-                armor set.
+                test
               </ProjectSectionText>
               <Button
                 secondary
                 iconHoverShift
                 icon="chevronRight"
-                href="https://store.steampowered.com/app/933480/Enderal_Forgotten_Stories/"
+                href="mishra19.netlify.app"
               >
                 View on Steam
               </Button>
