@@ -7,6 +7,7 @@ import {
   useEffect,
   useRef,
   useState,
+  Suspense,
 } from 'react';
 import {
   AmbientLight,
@@ -26,6 +27,9 @@ import {
   WebGLRenderTarget,
   WebGLRenderer,
   sRGBEncoding,
+  LinearFilter,
+  NearestFilter,
+  PCFSoftShadowMap,
 } from 'three';
 import { HorizontalBlurShader, VerticalBlurShader } from 'three-stdlib';
 import { resolveSrcFromSrcSet } from 'utils/image';
@@ -40,6 +44,13 @@ import {
 import styles from './Model.module.css';
 import { ModelAnimationType } from './deviceModels';
 
+// Pre-initialize loaders
+const preloadedModelLoader = modelLoader;
+const preloadedTextureLoader = textureLoader;
+
+// Cache for loaded models
+const modelCache = new Map();
+
 const MeshType = {
   Frame: 'Frame',
   Logo: 'Logo',
@@ -51,6 +62,15 @@ const rotationSpringConfig = {
   damping: 20,
   mass: 1.4,
   restSpeed: 0.001,
+};
+
+// Preload function
+const preloadModel = async (url) => {
+  if (!modelCache.has(url)) {
+    const model = await preloadedModelLoader.loadAsync(url);
+    modelCache.set(url, model);
+  }
+  return modelCache.get(url);
 };
 
 export const Model = ({
@@ -86,21 +106,35 @@ export const Model = ({
   const rotationX = useSpring(0, rotationSpringConfig);
   const rotationY = useSpring(0, rotationSpringConfig);
 
+  // Preload models when component mounts
+  useEffect(() => {
+    if (models) {
+      const modelUrls = Array.isArray(models) ? models.map(m => m.url) : [models.url];
+      Promise.all(modelUrls.map(url => preloadModel(url)));
+    }
+  }, [models]);
+
   useEffect(() => {
     const { clientWidth, clientHeight } = container.current;
 
     renderer.current = new WebGLRenderer({
       canvas: canvas.current,
       alpha: true,
-      antialias: false,
+      antialias: true,
       powerPreference: 'high-performance',
       failIfMajorPerformanceCaveat: true,
     });
 
-    renderer.current.setPixelRatio(2);
+    // Optimize renderer settings
+    renderer.current.setPixelRatio(window.devicePixelRatio > 2 ? 2 : window.devicePixelRatio);
     renderer.current.setSize(clientWidth, clientHeight);
     renderer.current.outputEncoding = sRGBEncoding;
     renderer.current.physicallyCorrectLights = true;
+    renderer.current.gammaFactor = 2.2;
+    
+    // Optimize shadow map settings
+    renderer.current.shadowMap.enabled = true;
+    renderer.current.shadowMap.type = PCFSoftShadowMap;
 
     camera.current = new PerspectiveCamera(36, clientWidth / clientHeight, 0.1, 100);
     camera.current.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
@@ -167,7 +201,7 @@ export const Model = ({
     shadowGroup.current.position.set(0, 0, -0.8);
     shadowGroup.current.rotateX(Math.PI / 2);
 
-    const renderTargetSize = 512;
+    const renderTargetSize = Math.min(512, clientWidth);
     const planeWidth = 8;
     const planeHeight = 8;
     const cameraHeight = 1.5;
@@ -177,10 +211,17 @@ export const Model = ({
     // The render target that will show the shadows in the plane texture
     renderTarget.current = new WebGLRenderTarget(renderTargetSize, renderTargetSize);
     renderTarget.current.texture.generateMipmaps = false;
+    renderTarget.current.texture.minFilter = LinearFilter;
+    renderTarget.current.texture.magFilter = NearestFilter;
+    renderTarget.current.stencilBuffer = false;
+    renderTarget.current.depthBuffer = true;
 
     // The render target that we will use to blur the first render target
     renderTargetBlur.current = new WebGLRenderTarget(renderTargetSize, renderTargetSize);
     renderTargetBlur.current.texture.generateMipmaps = false;
+    renderTargetBlur.current.texture.minFilter = LinearFilter;
+    renderTargetBlur.current.texture.magFilter = NearestFilter;
+    renderTargetBlur.current.stencilBuffer = false;
 
     // Make a plane and make it face up
     const planeGeometry = new PlaneBufferGeometry(planeWidth, planeHeight).rotateX(

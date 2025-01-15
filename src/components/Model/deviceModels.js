@@ -8,6 +8,13 @@ export const ModelAnimationType = {
   SmoothReveal: 'smooth-reveal'
 };
 
+// Progressive loading priorities
+export const LoadPriority = {
+  HIGH: 1,
+  MEDIUM: 2,
+  LOW: 3
+};
+
 export const deviceModels = {
   phone: {
     url: iphone11,
@@ -18,7 +25,14 @@ export const deviceModels = {
     rotationIntensity: 0.8,
     floatIntensity: 0.4,
     hoverIntensity: 1.2,
-    type: 'phone-model'
+    type: 'phone-model',
+    priority: LoadPriority.HIGH,
+    // Optimize geometry settings
+    geometryOptimization: {
+      simplify: true,
+      targetTriangles: 15000,
+      preserveTextures: true
+    }
   },
   laptop: {
     url: macbookPro,
@@ -29,6 +43,13 @@ export const deviceModels = {
     rotationIntensity: 0.6,
     floatIntensity: 0.3,
     hoverIntensity: 1.5,
-    type: 'laptop-model'
+    type: 'laptop-model',
+    priority: LoadPriority.HIGH,
+    // Optimize geometry settings
+    geometryOptimization: {
+      simplify: true,
+      targetTriangles: 20000,
+      preserveTextures: true
+    }
   },
 };
