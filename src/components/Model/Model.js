@@ -113,10 +113,12 @@ export const Model = ({
     const ambientLight = new AmbientLight(0xffffff, 1.2);
     const keyLight = new DirectionalLight(0xffffff, 1.1);
     const fillLight = new DirectionalLight(0xffffff, 0.8);
+    const rimLight = new DirectionalLight(0xffffff, 0.5);
 
     fillLight.position.set(-6, 2, 2);
     keyLight.position.set(0.5, 0, 0.866);
-    lights.current = [ambientLight, keyLight, fillLight];
+    rimLight.position.set(2, 1, -1);
+    lights.current = [ambientLight, keyLight, fillLight, rimLight];
     lights.current.forEach(light => scene.current.add(light));
 
     // The shadow container, if you need to move the plane just move this
@@ -290,8 +292,10 @@ export const Model = ({
         y: (event.clientY - innerHeight / 2) / innerHeight,
       };
 
-      rotationY.set(position.x / 2);
-      rotationX.set(position.y / 2);
+      // Get the first model's rotation intensity or use default
+      const intensity = models[0]?.rotationIntensity || 0.5;
+      rotationY.set(position.x * intensity);
+      rotationX.set(position.y * intensity);
     };
 
     if (isInViewport && !reduceMotion) {
@@ -301,7 +305,7 @@ export const Model = ({
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
     };
-  }, [isInViewport, reduceMotion, rotationX, rotationY]);
+  }, [isInViewport, reduceMotion, rotationX, rotationY, models]);
 
   // Handle window resize
   useEffect(() => {
@@ -481,6 +485,73 @@ const Device = ({
             restDelta: 0.0001,
             onUpdate: value => {
               frameNode.rotation.x = value;
+              renderFrame();
+            },
+          });
+        };
+      }
+
+      // Float and rotate animation
+      if (model.animation === ModelAnimationType.FloatAndRotate) {
+        playAnimation = () => {
+          if (!gltf?.scene) return;
+          
+          const startPosition = new Vector3(
+            targetPosition.x,
+            targetPosition.y - 1,
+            targetPosition.z
+          );
+
+          gltf.scene.position.set(...startPosition.toArray());
+
+          // Float animation
+          return animate(startPosition.y, targetPosition.y, {
+            type: 'spring',
+            delay: (300 * index + showDelay) / 1000,
+            stiffness: 50,
+            damping: 15,
+            mass: 1,
+            restSpeed: 0.0001,
+            restDelta: 0.0001,
+            onUpdate: value => {
+              if (!gltf?.scene) return;
+              gltf.scene.position.y = value + Math.sin(Date.now() * 0.003) * (model.floatIntensity || 0.2);
+              gltf.scene.rotation.y = Math.sin(Date.now() * 0.002) * 0.1 * (model.rotationIntensity || 0.5);
+              renderFrame();
+            },
+          });
+        };
+      }
+
+      // Smooth reveal animation
+      if (model.animation === ModelAnimationType.SmoothReveal) {
+        playAnimation = () => {
+          if (!gltf?.scene) return;
+          
+          const frameNode = gltf.scene.children.find(
+            node => node.name === MeshType.Frame
+          );
+          
+          if (!frameNode) return;
+          
+          const startRotation = new Vector3(MathUtils.degToRad(120), 0, 0);
+          const endRotation = new Vector3(0, 0, 0);
+
+          gltf.scene.position.set(...targetPosition.toArray());
+          frameNode.rotation.set(...startRotation.toArray());
+
+          // Smooth reveal animation
+          return animate(startRotation.x, endRotation.x, {
+            type: 'spring',
+            delay: (300 * index + showDelay + 300) / 1000,
+            stiffness: 60,
+            damping: 15,
+            restSpeed: 0.0001,
+            restDelta: 0.0001,
+            onUpdate: value => {
+              if (!frameNode || !gltf?.scene) return;
+              frameNode.rotation.x = value;
+              gltf.scene.position.y = targetPosition.y + Math.sin(Date.now() * 0.002) * (model.floatIntensity || 0.1);
               renderFrame();
             },
           });

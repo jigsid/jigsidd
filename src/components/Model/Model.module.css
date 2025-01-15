@@ -1,13 +1,31 @@
 .model {
   position: relative;
   opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  transition: transform 0.8s var(--bezierFastoutSlowin);
+  will-change: transform, opacity;
 
   &[data-loaded='true']:global {
-    animation: fadeIn 1s ease forwards var(--delay);
+    animation: fadeIn 1s cubic-bezier(0.4, 0.0, 0.2, 1) forwards var(--delay);
+    transform: translateY(0) scale(1);
   }
 }
 
 .canvas {
   position: absolute;
   inset: 0;
+  transition: filter 0.4s ease;
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
