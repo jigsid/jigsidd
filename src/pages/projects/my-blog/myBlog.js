@@ -58,8 +58,8 @@ export const MyBlog = () => {
         <ProjectHeader
           title={title}
           description={description}
-          url="https://github.com/jigsid/Ez-Pay"
-          url2="https://ez-pay-opal.vercel.app/"
+          url="https://github.com/jigsid/papiauto"
+          url2="https://papiauto.vercel.app/"
           roles={roles}
         />
         <ProjectSection padding="top">
