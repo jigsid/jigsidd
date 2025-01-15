@@ -45,10 +45,11 @@ const description =
   'Technologies Used: Next.js, Typescript, Postgress, Prisma ORM, Slack/discord/notion/google integration, clerk authentication';
 const roles = [
   'Functionlaties',
-  'Modern UI',
-  'Autosend messages to slack/discord/notion',
-  'Clerk Authentication',
-  'AI bot',
+  'Connect and sync user tools',
+  'Automate workflows with triggers',
+  'Customizable UI with dark mode',
+  'Drag-and-drop workflow builder',
+  'AI chatbot',
 ];
 
 export const Slice = () => {

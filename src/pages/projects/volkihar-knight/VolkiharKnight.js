@@ -45,10 +45,15 @@ import styles from './VolkiharKnight.module.css';
 const Carousel = dynamic(() => import('components/Carousel').then(mod => mod.Carousel));
 const Armor = dynamic(() => import('./Armor').then(mod => mod.Armor));
 
-const title = 'Volkihar Knight';
+const title = 'AI Marketing';
 const description =
-  'A lore-friendly armor mod for The Elder Scrolls V: Skyrim. Released on PC and Xbox One with over one million downloads across both platforms.';
-const roles = ['3D Modelling', 'Texturing', 'Graphic Design'];
+  'Technologies used : Nextjs, Typescript, Tailwind, Clerk, Neon, Uploadcare, Cloudways, Bun, Stripe, Pusher';
+const roles = ['Functionalities',
+  'Automated AI sales rep chatbot',
+'Smart question linking and bookings',
+'Customizable interface with white-labeling',
+'Stripe payment integration and dashboard',
+'SEO-optimized blogging and secure uploads'];
 
 export function VolkiharKnight() {
   return (
@@ -77,88 +82,17 @@ export function VolkiharKnight() {
         <ProjectHeader
           title={title}
           description={description}
-          linkLabel="Get the mod"
-          url="mishra19.netlify.app"
+          linkLabel="github"
+          url="https://github.com/jigsid/chatbot"
+          url2="https://chatbot-jigsid.vercel.app/"
           roles={roles}
         />
-        <ProjectSection>
-          <ProjectSectionContent>
-            <ProjectImage
-              srcSet={[volkiharBanner, volkiharBannerLarge]}
-              placeholder={volkiharBannerPlaceholder}
-              alt="A dark elf wearing the Volkihar Knight armor with the logo overlaid on the image."
-              sizes={`(max-width: ${media.mobile}px) 500px, (max-width: ${media.tablet}px) 800px, 1000px`}
-            />
-          </ProjectSectionContent>
-        </ProjectSection>
-        <ProjectSection>
-          <ProjectSectionContent>
-            <Image
-              srcSet={[volkiharBook, volkiharBookLarge]}
-              placeholder={volkiharBookPlaceholder}
-              alt="A book containing a sketch depicting the logo and armor"
-              sizes={`(max-width: ${media.mobile}px) 90vw, (max-width: ${media.tablet}px) 80vw, 70vw`}
-            />
-          </ProjectSectionContent>
-        </ProjectSection>
-        <ProjectSection>
-          <ProjectSectionColumns>
-            <div className={styles.armor}>
-              <Armor alt="3D model of the Volkihar Knight armor" />
-            </div>
-            <div className={styles.textSection}>
-              <ProjectSectionHeading>Armor design</ProjectSectionHeading>
-              
-              <ProjectSectionText>
-                test
-              </ProjectSectionText>
-            </div>
-          </ProjectSectionColumns>
-        </ProjectSection>
-        <ProjectSection>
-          <ProjectSectionContent>
-            <div className={styles.logoContainer}>
-              <VolkiharKnightLogo
-                role="img"
-                aria-label="The Volkihar Knight logo, a monogram using the letters 'V' and 'K"
-              />
-            </div>
-            <ProjectTextRow center noMargin>
-              <ProjectSectionHeading>Identity design</ProjectSectionHeading>
-              <ProjectSectionText>
-                The monogram uses custom designed typography to get the right balance of
-                weight and angularity. I combined this with Trajan for the text, which is
-                also used for Skyrim’s game title wordmark.
-              </ProjectSectionText>
-            </ProjectTextRow>
-          </ProjectSectionContent>
-        </ProjectSection>
-        <ProjectSection>
-          <ProjectSectionContent>
-            <Carousel
-              placeholder={volkiharSlidePlaceholder}
-              images={[
-                {
-                  srcSet: [volkiharSlide1, volkiharSlide1Large],
-                  sizes: `(max-width: ${media.mobile}px) 100vw, (max-width: ${media.tablet}px) 100vw, 1096px`,
-                  alt: 'A female character wearing the black coloured armor set.',
-                },
-                {
-                  srcSet: [volkiharSlide2, volkiharSlide2Large],
-                  sizes: `(max-width: ${media.mobile}px) 100vw, (max-width: ${media.tablet}px) 100vw, 1096px`,
-                  alt: 'A close up of the custom gauntlets design.',
-                },
-                {
-                  srcSet: [volkiharSlide3, volkiharSlide3Large],
-                  sizes: `(max-width: ${media.mobile}px) 100vw, (max-width: ${media.tablet}px) 100vw, 1096px`,
-                  alt: 'A female character wielding a sword and wearing the red coloured armor.',
-                },
-              ]}
-              width={1920}
-              height={1080}
-            />
-          </ProjectSectionContent>
-        </ProjectSection>
+        
+        
+        
+        
+          
+        
         <ProjectSection
           backgroundElement={
             <Image
@@ -178,18 +112,9 @@ export function VolkiharKnight() {
                 sizes={`(max-width: ${media.mobile}px) 100vw, (max-width: ${media.tablet}px) 100vw, 220px`}
                 style={{ maxWidth: 220, width: '100%', marginBottom: 30 }}
               />
-              <ProjectSectionHeading>Featured in Enderal</ProjectSectionHeading>
-              <ProjectSectionText>
-                test
-              </ProjectSectionText>
-              <Button
-                secondary
-                iconHoverShift
-                icon="chevronRight"
-                href="mishra19.netlify.app"
-              >
-                View on Steam
-              </Button>
+              
+              
+              
             </ProjectTextRow>
           </ProjectSectionContent>
         </ProjectSection>

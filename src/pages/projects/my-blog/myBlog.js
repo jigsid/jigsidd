@@ -27,16 +27,15 @@ import {
 import { Fragment } from 'react';
 import { media } from 'utils/style';
 
-const title = 'Ez Pay';
+const title = 'Instagram Automation';
 const description =
-  'Technologies used : Nextjs , Expressjs , Tailwind , PostgreSQL ,Prisma ORM , Docker , CI/CD for deployemnt of image to docker hub.  ';
-
+  'Technologies used : Nextjs, Typescript, Tailwind, Instagram API, Relume, Prisma, Webhooks';
 const roles = [
   'Functionalities:',
-  'Signup/Signin Page',
-  'User data page(dashboard)',
-  'Money withdrawl with bank',
-  'Money Transfer with other Users ',
+  'Instagram API integration with OAuth',
+  'Automated DM outreach and replies',
+  'AI-driven high-ticket sales automation',
+  'Optimistic UI for fast experience',
 ];
 
 export const MyBlog = () => {

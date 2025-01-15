@@ -89,8 +89,8 @@ export const Home = () => {
         sectionRef={projectOne}
         visible={visibleSections.includes(projectOne.current)}
         index={1}
-        title="Ez Pay "
-        description="This is a payment website where User can withdrawl money from bank and transfer money with friends."
+        title="Instagram Automation"
+        description="This website offers Instagram API integration, AI-powered DM automations, keyword-based triggers, story replies, a seamless dashboard, payment plans, and webhooks, optimizing customer outreach and automating high-ticket sales processes."
         buttonText="View project"
         buttonLink="/projects/my-blog"
         model={{
@@ -135,7 +135,7 @@ export const Home = () => {
         visible={visibleSections.includes(projectThree.current)}
         index={3}
         title=" Automate"
-        description="Website where user can automate their work by sending messages to slack/discord/notion all at one place.Also AI bot is there to help you out."
+        description="This B2C SaaS integrates Google Drive, Slack, Discord, Notion, and Stripe with custom-built connections, offering automation flows, a node-based drag-and-drop builder, infinite canvas, and stunning UI with light/dark modes."
         buttonLink="/projects/slice"
         buttonText="View project"
         model={{
@@ -155,8 +155,8 @@ export const Home = () => {
         sectionRef={projectFour}
         visible={visibleSections.includes(projectFour.current)}
         index={4}
-        title="Volkihar Knight"
-        description="A lore-friendly armor mod for The Elder Scrolls V: Skyrim. Released on PC and Xbox One with over one million downloads across both platforms."
+        title="AI Marketing"
+        description="This Next.js 15 project features an AI chatbot for automated sales, real-time chat, secure file uploads, SEO-optimized blogging, and email marketing, offering seamless user engagement and lead generation."
         buttonText="View project"
         buttonLink="/projects/volkihar-knight"
         model={{
