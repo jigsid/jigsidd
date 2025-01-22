@@ -12,15 +12,15 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>undefined/projects/my-blog/</loc>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
     <loc>undefined/projects/slice/</loc>
     <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>undefined/projects/volkihar-knight/</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>undefined/projects/my-blog/</loc>
     <changefreq>monthly</changefreq>
   </url>
   <url>
