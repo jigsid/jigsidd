@@ -50,17 +50,20 @@
 
   &:hover {
     .details {
-      transform: translateZ(120px);
+      transform: translateZ(160px);
+      transition: transform 0.8s cubic-bezier(0.17, 0.67, 0.35, 0.96);
     }
 
     .model[data-device='laptop'] {
-      transform: translateZ(80px) rotateY(-12deg) rotateX(2deg);
-      filter: brightness(1.1) contrast(1.05);
+      transform: translateZ(100px) rotateY(-14deg) rotateX(3deg);
+      filter: brightness(1.15) contrast(1.1);
+      transition: all 0.8s cubic-bezier(0.17, 0.67, 0.35, 0.96);
     }
 
     .model[data-device='phone'] {
-      transform: translateZ(80px) rotateY(-12deg) rotateX(2deg);
-      filter: brightness(1.1) contrast(1.05);
+      transform: translateZ(100px) rotateY(-14deg) rotateX(3deg);
+      filter: brightness(1.15) contrast(1.1);
+      transition: all 0.8s cubic-bezier(0.17, 0.67, 0.35, 0.96);
     }
 
     @media (--mediaTablet) {
@@ -109,8 +112,8 @@
 .details {
   z-index: var(--zIndex1);
   position: relative;
-  transform: translateZ(100px);
-  transition: all 0.7s cubic-bezier(0.3, 0.1, 0.3, 1);
+  transform: translateZ(80px);
+  transition: transform 0.8s cubic-bezier(0.17, 0.67, 0.35, 0.96);
   padding: var(--spaceL);
 
   @media (--mediaTablet) {
@@ -159,13 +162,13 @@
   display: grid;
   position: relative;
   transform-style: preserve-3d;
-  transition: all 0.7s cubic-bezier(0.3, 0.1, 0.3, 1);
+  transition: all 0.8s cubic-bezier(0.17, 0.67, 0.35, 0.96);
   filter: brightness(1) contrast(1.02);
 
   &[data-device='laptop'] {
     top: 5%;
     left: -25%;
-    transform: translateZ(60px) rotateY(-8deg);
+    transform: translateZ(40px) rotateY(-8deg);
     filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.18));
 
     @nest .summary[data-alternate='true'] & {
@@ -196,7 +199,7 @@
     --aspectRatio: 7 / 10;
     top: 5%;
     left: -5%;
-    transform: translateZ(60px) rotateY(-8deg);
+    transform: translateZ(40px) rotateY(-8deg);
     filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.18));
 
     @media (--mediaTablet) {
