@@ -275,19 +275,32 @@ export const DisplacementSphere = (props) => {
             onMouseLeave={() => setIsHovered(false)}
             aria-label={isPlaying ? 'Pause background music' : 'Play background music'}
             className={styles.musicButton}
+            data-playing={isPlaying}
             style={{
               opacity: isHovered ? 1 : barOpacity,
-              boxShadow: isHovered ? '0 8px 32px rgba(0, 0, 0, 0.3)' : 'none',
+              transform: `scale(1) translateZ(0)`,
+              transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
-            <Icon icon={isPlaying ? 'pause' : 'play'} />
+            <Icon 
+              icon={isPlaying ? 'pause' : 'play'} 
+              style={{ 
+                fontSize: '24px',
+                transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+                filter: `drop-shadow(0 0 8px rgba(var(--rgbPrimary), ${isHovered ? 0.4 : 0.2}))`
+              }} 
+            />
             <div className={styles.visualizer}>
-              {audioVisualizerData.slice(0, 3).map((value, index) => (
+              {[...Array(3)].map((_, index) => (
                 <div
                   key={index}
                   className={styles.visualizerBar}
                   style={{
-                    height: `${value * 100}%`,
+                    height: isPlaying 
+                      ? `${(audioVisualizerData[index] || 0.3) * 100}%`
+                      : ['65%', '100%', '80%'][index],
+                    opacity: isPlaying ? 1 : 0.8
                   }}
                 />
               ))}

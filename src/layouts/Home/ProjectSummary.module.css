@@ -115,6 +115,8 @@
   transform: translateZ(80px);
   transition: transform 0.8s cubic-bezier(0.17, 0.67, 0.35, 0.96);
   padding: var(--spaceL);
+  color: rgb(var(--rgbWhite));
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 
   @media (--mediaTablet) {
     flex: 0 0 auto;
@@ -298,6 +300,7 @@
   font-size: var(--fontSizeH2);
   letter-spacing: -0.6px;
   line-height: 1.1;
+  color: rgb(var(--rgbWhite));
 
   @media (--mediaUseMotion) {
     transition-property: transform, opacity;
@@ -316,6 +319,7 @@
   transform: translate3d(0, var(--spaceL), 0);
   font-size: var(--fontSizeBodyL);
   line-height: 1.8;
+  color: rgb(var(--rgbWhite));
 
   @media (--mediaUseMotion) {
     transition-property: transform, opacity;
