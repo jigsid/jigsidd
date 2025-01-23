@@ -18,6 +18,8 @@
   color: var(--buttonTextColor);
   position: relative;
   isolation: isolate;
+  filter: none;
+  box-shadow: none;
 
   &:active {
     transition-duration: calc(var(--durationXS) / 2);
@@ -33,6 +35,7 @@
     inset: 0;
     z-index: -1;
     clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+    box-shadow: none;
   }
 
   @media (--mediaUseMotion) {
