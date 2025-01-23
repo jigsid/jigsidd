@@ -115,7 +115,7 @@
   transform: translateZ(80px);
   transition: transform 0.8s cubic-bezier(0.17, 0.67, 0.35, 0.96);
   padding: var(--spaceL);
-  color: rgb(var(--rgbWhite));
+  color: var(--colorTextBody);
   text-shadow: none;
 
   @media (--mediaTablet) {
@@ -293,14 +293,15 @@
 }
 
 .title {
-  margin-bottom: var(--spaceXL);
-  transition: all 0.7s cubic-bezier(0.3, 0.1, 0.3, 1);
-  opacity: 0;
-  transform: translate3d(0, var(--spaceL), 0);
+  margin: 0;
   font-size: var(--fontSizeH2);
-  letter-spacing: -0.6px;
-  line-height: 1.1;
-  color: rgb(var(--rgbWhite));
+  font-weight: var(--fontWeightMedium);
+  line-height: var(--lineHeightTitle);
+  color: var(--colorTextTitle);
+  margin-bottom: var(--spaceM);
+  text-transform: capitalize;
+  opacity: 0;
+  transition: opacity var(--durationXL) ease;
 
   @media (--mediaUseMotion) {
     transition-property: transform, opacity;
@@ -313,13 +314,13 @@
 }
 
 .description {
-  margin-bottom: var(--spaceXL);
-  transition: all 0.7s cubic-bezier(0.3, 0.1, 0.3, 1);
-  opacity: 0;
-  transform: translate3d(0, var(--spaceL), 0);
   font-size: var(--fontSizeBodyL);
-  line-height: 1.8;
-  color: rgb(var(--rgbWhite));
+  line-height: var(--lineHeightBody);
+  color: var(--colorTextBody);
+  margin: 0;
+  margin-bottom: var(--spaceL);
+  opacity: 0;
+  transition: opacity var(--durationXL) ease;
 
   @media (--mediaUseMotion) {
     transition-property: transform, opacity;
