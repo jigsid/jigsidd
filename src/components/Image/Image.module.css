@@ -4,19 +4,37 @@
   display: grid;
   grid-template-columns: 100%;
   isolation: isolate;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+
+  &:hover {
+    transform: scale3d(1.03, 1.03, 1);
+  }
 
   &[data-raised='true'] {
     box-shadow: 0 50px 100px -20px rgb(var(--rgbBlack) / 0.25),
       0 30px 60px -30px rgb(var(--rgbBlack) / 0.3);
+    transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      box-shadow: 0 70px 125px -25px rgb(var(--rgbBlack) / 0.35),
+        0 45px 85px -35px rgb(var(--rgbBlack) / 0.4);
+    }
   }
 
   &[data-reveal='true'] {
-    --revealDuration: 1.8s;
+    --revealDuration: 1.5s;
+    transform: scale3d(0.7, 0.7, 1);
+    transition: all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-    transition: box-shadow var(--durationL) ease calc(var(--revealDuration) / 2);
+    &[data-visible='true'] {
+      transform: scale3d(1, 1, 1);
+    }
 
     &:not([data-visible='true']) {
       box-shadow: none;
+      opacity: 0;
     }
 
     &::before {
@@ -28,13 +46,30 @@
       transform-origin: left;
       will-change: transform;
       z-index: var(--zIndex2);
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     @media (--mediaUseMotion) {
       &[data-visible='true']::before:global {
-        animation: reveal var(--revealDuration) var(--bezierFastoutSlowin) var(--delay);
+        animation: reveal var(--revealDuration) cubic-bezier(0.16, 1, 0.3, 1) var(--delay);
+      }
+
+      &[data-visible='true'] {
+        animation: projectZoomIn 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
       }
     }
+  }
+}
+
+@keyframes projectZoomIn {
+  0% {
+    transform: scale3d(0.7, 0.7, 1);
+    opacity: 0;
+  }
+  
+  100% {
+    transform: scale3d(1, 1, 1);
+    opacity: 1;
   }
 }
 
@@ -47,15 +82,17 @@
 
 .elementWrapper {
   opacity: 0;
-  transition: none;
-  transform: none;
   position: relative;
   display: grid;
   grid-template-columns: 100%;
+  transform: scale3d(0.92, 0.92, 1);
+  transition: opacity 0.8s ease-out,
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 
   &[data-reveal='true'] {
     opacity: 0;
-    transition: opacity var(--durationM) ease var(--delay);
+    transition: opacity var(--durationL) ease-out var(--delay),
+                transform 1s cubic-bezier(0.16, 1, 0.3, 1) var(--delay);
 
     @media (--mediaReduceMotion) {
       transition-delay: calc(var(--delay) - 1s);
@@ -64,22 +101,30 @@
 
   &[data-visible='true'] {
     opacity: 1;
+    transform: scale3d(1, 1, 1);
   }
 }
 
 .placeholder {
   width: 100%;
   height: auto;
-  transition: opacity var(--durationM) ease var(--delay);
+  transition: opacity 0.3s ease-out var(--delay);
   pointer-events: none;
   position: relative;
   z-index: var(--zIndex1);
   opacity: 1;
   grid-column: 1;
   grid-row: 1;
+  filter: blur(10px);
+  transform: scale(1.05);
 
   &[data-loaded='true'] {
     opacity: 0;
+    filter: blur(0);
+    transform: scale(1);
+    transition: opacity 0.4s ease-out,
+                filter 0.4s ease-out,
+                transform 0.4s ease-out;
   }
 }
 
@@ -91,6 +136,7 @@
   grid-row: 1;
   /* stylelint-disable-next-line value-no-vendor-prefix */
   image-rendering: -webkit-optimize-contrast;
+  transition: opacity 0.5s ease-out;
 
   &[data-loaded='true'] {
     opacity: 1;
@@ -105,6 +151,7 @@
   height: 32px;
   color: rgb(var(--rgbWhite));
   padding: 0 8px 0 2px;
+  transition: opacity 0.3s ease-out;
 
   &::after {
     background-color: rgb(var(--rgbBlack) / 0.8);
